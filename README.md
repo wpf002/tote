@@ -44,6 +44,12 @@ Done and green:
 - **Posting engine** (`Ledger`) over an async `LedgerStore` port. Validates
   balancing, derives dimensional balances, reverses entries, computes net
   position, all bound to a single tenant.
+- **Canonical posting templates** (`src/posting`): pure functions for every
+  event in the appendix (vendor bill, training charge, passthrough+markup,
+  payments, purse received/disbursed/credited), each with a golden test.
+- **Purse disbursement engine** (the Phase 2 wedge): splits a purse's owner-net
+  across owning parties, recursively resolving nested syndicates to leaf
+  partners, penny-exact, and produces the balanced `purse received` posting.
 - **Domain schema** (`@tote/db`): 41-model Prisma schema covering the whole
   roadmap; initial migration applied; a `PrismaLedgerStore` satisfies the exact
   same `LedgerStore` contract, so the engine and its property tests run
