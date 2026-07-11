@@ -12,7 +12,12 @@
     "build": "pnpm -r build",
     "typecheck": "pnpm -r typecheck",
     "test": "pnpm -r test",
-    "lint": "pnpm -r lint"
+    "lint": "pnpm -r lint",
+    "db:up": "docker compose up -d --wait postgres",
+    "db:down": "docker compose down",
+    "db:generate": "pnpm --filter @tote/db generate",
+    "db:migrate": "pnpm --filter @tote/db migrate:dev",
+    "test:integration": "pnpm db:up && DATABASE_URL=postgresql://tote:tote@localhost:55432/tote?schema=public pnpm --filter @tote/db exec prisma migrate deploy && DATABASE_URL=postgresql://tote:tote@localhost:55432/tote?schema=public pnpm --filter @tote/db test"
   },
   "devDependencies": {
     "typescript": "^5.6.3",

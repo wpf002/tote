@@ -22,39 +22,50 @@ These never break, in any phase. Each has a test that fails loudly if it does.
 
 ```
 packages/
-  core/            @tote/core — the financial spine
+  core/            @tote/core — the financial spine (pure, no I/O)
     src/money/     Cents, toCents, format, splitCents, arithmetic helpers
     src/ownership/ effective-dated ownership resolver (recurses syndicate membership)
-    src/ledger/    posting engine: postEntry / balanceOf / reverseEntry / netPosition
+    src/ledger/    posting engine + LedgerStore port + in-memory store
     test/          unit + fast-check property tests for every invariant
+  db/              @tote/db — Prisma schema, migrations, Postgres LedgerStore
+    prisma/        41-model domain schema + initial migration
+    src/           PrismaLedgerStore (same LedgerStore contract as core)
+    test/          integration tests against a real Postgres
 ```
 
 ## Status — Phase 0 (Foundation)
 
 Done and green:
 
-- Money layer: `Cents` (branded bigint), `toCents`, `format`, `splitCents`
+- **Money layer**: `Cents` (branded bigint), `toCents`, `format`, `splitCents`
   (largest-remainder), arithmetic + `applyBps`.
-- Ownership resolver: horse + date → effective leaf-party stakes, recursively
+- **Ownership resolver**: horse + date → effective leaf-party stakes, recursively
   resolving nested syndicates, with cycle detection and effective dating.
-- Posting engine (`Ledger`) over a `LedgerStore` interface, with an append-only
-  in-memory store. Validates balancing, derives dimensional balances, reverses
-  entries, computes net position, all bound to a single tenant.
+- **Posting engine** (`Ledger`) over an async `LedgerStore` port. Validates
+  balancing, derives dimensional balances, reverses entries, computes net
+  position, all bound to a single tenant.
+- **Domain schema** (`@tote/db`): 41-model Prisma schema covering the whole
+  roadmap; initial migration applied; a `PrismaLedgerStore` satisfies the exact
+  same `LedgerStore` contract, so the engine and its property tests run
+  unchanged against Postgres.
 
 Property tests cover: `splitCents` always sums to the total; ownership splits of
 random nested trees stay penny-exact; any posting sequence's derived balance
-matches the hand-summed expected; reversals restore balances; no query crosses a
-tenant boundary.
+matches the hand-summed expected (in-memory **and** on Postgres); reversals
+restore balances; no query crosses a tenant boundary.
 
-Next: Postgres-backed `LedgerStore` (Prisma), the 40-model domain schema and
-initial migration, auth/sessions, and multi-tenancy middleware.
+Next in Phase 0: auth/sessions, and the multi-tenancy request middleware.
 
 ## Develop
 
 ```bash
 pnpm install
+pnpm db:generate          # generate the Prisma client
 pnpm -r typecheck
-pnpm -r test        # unit + property tests
+pnpm -r test              # unit + property tests (DB integration auto-skips)
+
+# Integration tests against a real Postgres (Docker):
+pnpm test:integration     # spins up pg on :55432, migrates, runs @tote/db tests
 ```
 
-Requires Node >= 18 and pnpm 9.
+Requires Node >= 18 and pnpm 9. Integration tests and migrations need Docker.

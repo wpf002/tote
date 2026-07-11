@@ -2,20 +2,22 @@ import type { AccountKind, PostedEntry, PostedLine } from "./types.js";
 
 /**
  * Append-only storage the posting engine writes through. The interface exposes
- * no update or delete — invariant #3, the ledger is immutable. A Postgres-backed
- * implementation (Phase 0 deliverable) drops in behind the same contract.
+ * no update or delete — invariant #3, the ledger is immutable. The in-memory
+ * implementation below and a Postgres-backed one (`@tote/db`) both satisfy it.
  *
- * All reads are tenant-scoped by the caller; a store must never let a query see
- * lines outside the given (orgId, legalEntityId).
+ * Reads and writes are async so a real database drops in unchanged. All reads
+ * are tenant-scoped; a store must never let a query see lines outside the given
+ * (orgId, legalEntityId). Id generation stays synchronous — it never needs a
+ * round trip.
  */
 export interface LedgerStore {
   /** Persist a fully-formed entry and its lines atomically. */
-  append(entry: PostedEntry): void;
+  append(entry: PostedEntry): Promise<void>;
   /** Fetch one entry within a tenant, or undefined if not visible to it. */
-  getEntry(scope: TenantScope, entryId: string): PostedEntry | undefined;
+  getEntry(scope: TenantScope, entryId: string): Promise<PostedEntry | undefined>;
   /** All lines matching the scope + optional account/dimension filter. */
-  queryLines(scope: TenantScope, filter: LineFilter): PostedLine[];
-  /** Monotonic id for the next entry/line — deterministic, no randomness. */
+  queryLines(scope: TenantScope, filter: LineFilter): Promise<PostedLine[]>;
+  /** A fresh id for a new entry/line. */
   nextId(prefix: string): string;
 }
 
@@ -36,14 +38,14 @@ export class InMemoryLedgerStore implements LedgerStore {
   private readonly entries = new Map<string, PostedEntry>();
   private readonly counters = new Map<string, number>();
 
-  append(entry: PostedEntry): void {
+  async append(entry: PostedEntry): Promise<void> {
     if (this.entries.has(entry.id)) {
       throw new Error(`Entry ${entry.id} already exists; the ledger is append-only`);
     }
     this.entries.set(entry.id, entry);
   }
 
-  getEntry(scope: TenantScope, entryId: string): PostedEntry | undefined {
+  async getEntry(scope: TenantScope, entryId: string): Promise<PostedEntry | undefined> {
     const entry = this.entries.get(entryId);
     if (!entry) return undefined;
     if (entry.orgId !== scope.orgId || entry.legalEntityId !== scope.legalEntityId) {
@@ -52,7 +54,7 @@ export class InMemoryLedgerStore implements LedgerStore {
     return entry;
   }
 
-  queryLines(scope: TenantScope, filter: LineFilter): PostedLine[] {
+  async queryLines(scope: TenantScope, filter: LineFilter): Promise<PostedLine[]> {
     const out: PostedLine[] = [];
     for (const entry of this.entries.values()) {
       if (entry.orgId !== scope.orgId || entry.legalEntityId !== scope.legalEntityId) continue;

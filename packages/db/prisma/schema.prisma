@@ -1,0 +1,721 @@
+// Tote domain schema. Model broadly, build narrowly: the whole industry is
+// represented here; features are wired as phases pull for them.
+//
+// Money is always BigInt cents (invariant #1). Balances are NEVER stored — they
+// are derived from JournalLine (invariant #2). The ledger is append-only
+// (invariant #3): corrections post reversing entries.
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ---------------------------------------------------------------------------
+// Enums
+// ---------------------------------------------------------------------------
+
+enum LegalEntityType {
+  TRAINER
+  SYNDICATE
+  OWNER
+  FARM
+  OTHER
+}
+
+enum PartyType {
+  INDIVIDUAL
+  SYNDICATE
+  VENDOR
+  EMPLOYEE
+  JOCKEY
+  ORG_INTERNAL
+}
+
+enum UserRole {
+  STAFF_ADMIN
+  STAFF
+  OWNER_PORTAL
+}
+
+enum AccountKind {
+  CASH
+  ACCOUNTS_RECEIVABLE
+  ACCOUNTS_PAYABLE
+  OPERATING_EXPENSE
+  OPERATING_INCOME
+  OWNER_PURSE_PAYABLE
+  PURSE_REVENUE
+  WAGES_PAYABLE
+  HORSE_ASSET
+  OWNER_DEPOSITS
+  OWNER_EQUITY
+}
+
+enum VendorBillStatus {
+  DRAFT
+  APPROVED
+  PAID
+  VOID
+}
+
+enum InvoiceStatus {
+  DRAFT
+  FINALIZED
+  PAID
+  VOID
+}
+
+enum PaymentDirection {
+  IN
+  OUT
+}
+
+enum PaymentMethod {
+  CASH
+  CHECK
+  ACH
+  CARD
+  PURSE_CREDIT
+}
+
+enum RaceEntryStatus {
+  NOMINATED
+  ENTERED
+  SCRATCHED
+  RAN
+}
+
+// ---------------------------------------------------------------------------
+// Tenancy & auth
+// ---------------------------------------------------------------------------
+
+model Org {
+  id        String   @id @default(cuid())
+  name      String
+  createdAt DateTime @default(now())
+
+  legalEntities LegalEntity[]
+  users         User[]
+
+  @@map("orgs")
+}
+
+model LegalEntity {
+  id        String          @id @default(cuid())
+  orgId     String
+  name      String
+  type      LegalEntityType @default(TRAINER)
+  createdAt DateTime        @default(now())
+
+  org            Org            @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  journalEntries JournalEntry[]
+
+  @@index([orgId])
+  @@map("legal_entities")
+}
+
+model User {
+  id           String   @id @default(cuid())
+  orgId        String
+  email        String   @unique
+  passwordHash String
+  role         UserRole @default(STAFF)
+  // Owner-portal users are linked to the Party they can see.
+  partyId      String?
+  createdAt    DateTime @default(now())
+
+  org      Org       @relation(fields: [orgId], references: [id], onDelete: Cascade)
+  sessions Session[]
+
+  @@index([orgId])
+  @@map("users")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  userId    String
+  tokenHash String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@map("sessions")
+}
+
+model AuditLog {
+  id            String   @id @default(cuid())
+  orgId         String
+  legalEntityId String?
+  actorUserId   String?
+  action        String
+  entityType    String
+  entityId      String
+  data          Json?
+  createdAt     DateTime @default(now())
+
+  @@index([orgId, entityType, entityId])
+  @@map("audit_logs")
+}
+
+// ---------------------------------------------------------------------------
+// Parties, horses, ownership
+// ---------------------------------------------------------------------------
+
+model Party {
+  id        String    @id @default(cuid())
+  orgId     String
+  type      PartyType
+  name      String
+  email     String?
+  createdAt DateTime  @default(now())
+
+  ownerships         Ownership[]
+  membershipsAsSynd  SyndicateMembership[] @relation("SyndicateOf")
+  membershipsAsMember SyndicateMembership[] @relation("MemberOf")
+
+  @@index([orgId, name])
+  @@map("parties")
+}
+
+model SyndicateMembership {
+  id            String    @id @default(cuid())
+  orgId         String
+  syndicateId   String
+  memberPartyId String
+  basisPoints   Int
+  from          DateTime
+  to            DateTime?
+
+  syndicate Party @relation("SyndicateOf", fields: [syndicateId], references: [id], onDelete: Cascade)
+  member    Party @relation("MemberOf", fields: [memberPartyId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, syndicateId])
+  @@map("syndicate_memberships")
+}
+
+model Horse {
+  id        String   @id @default(cuid())
+  orgId     String
+  name      String
+  createdAt DateTime @default(now())
+
+  ownerships    Ownership[]
+  trainingRates TrainingRate[]
+
+  @@index([orgId, name])
+  @@map("horses")
+}
+
+model Ownership {
+  id          String    @id @default(cuid())
+  orgId       String
+  horseId     String
+  partyId     String
+  basisPoints Int
+  from        DateTime
+  to          DateTime?
+
+  horse Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
+  party Party @relation(fields: [partyId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, horseId])
+  @@map("ownerships")
+}
+
+model TrainingRate {
+  id            String    @id @default(cuid())
+  orgId         String
+  horseId       String
+  dailyRateCents BigInt
+  from          DateTime
+  to            DateTime?
+
+  horse Horse @relation(fields: [horseId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, horseId])
+  @@map("training_rates")
+}
+
+model Category {
+  id       String  @id @default(cuid())
+  orgId    String
+  name     String
+  taxCode  String?
+  markupBp Int     @default(0)
+
+  @@index([orgId])
+  @@map("categories")
+}
+
+// ---------------------------------------------------------------------------
+// The ledger (immutable, append-only)
+// ---------------------------------------------------------------------------
+
+model JournalEntry {
+  id            String   @id
+  orgId         String
+  legalEntityId String
+  date          DateTime
+  memo          String?
+  reversalOf    String?
+  createdAt     DateTime @default(now())
+
+  legalEntity LegalEntity   @relation(fields: [legalEntityId], references: [id], onDelete: Cascade)
+  lines       JournalLine[]
+
+  @@index([orgId, legalEntityId])
+  @@map("journal_entries")
+}
+
+model JournalLine {
+  id            String      @id
+  entryId       String
+  orgId         String
+  legalEntityId String
+  accountKind   AccountKind
+  debit         BigInt      @default(0)
+  credit        BigInt      @default(0)
+  partyId       String?
+  horseId       String?
+  categoryId    String?
+
+  entry JournalEntry @relation(fields: [entryId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, legalEntityId, accountKind])
+  @@index([orgId, legalEntityId, accountKind, partyId])
+  @@index([orgId, legalEntityId, accountKind, horseId])
+  @@map("journal_lines")
+}
+
+// ---------------------------------------------------------------------------
+// Billing
+// ---------------------------------------------------------------------------
+
+model VendorBill {
+  id            String           @id @default(cuid())
+  orgId         String
+  legalEntityId String
+  vendorPartyId String
+  horseId       String?
+  status        VendorBillStatus @default(DRAFT)
+  billDate      DateTime
+  journalEntryId String?
+  createdAt     DateTime         @default(now())
+
+  lines VendorBillLine[]
+
+  @@index([orgId, legalEntityId])
+  @@map("vendor_bills")
+}
+
+model VendorBillLine {
+  id          String @id @default(cuid())
+  billId      String
+  categoryId  String?
+  description String
+  amountCents BigInt
+
+  bill VendorBill @relation(fields: [billId], references: [id], onDelete: Cascade)
+
+  @@index([billId])
+  @@map("vendor_bill_lines")
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  orgId         String
+  legalEntityId String
+  ownerPartyId  String
+  periodStart   DateTime
+  periodEnd     DateTime
+  status        InvoiceStatus @default(DRAFT)
+  journalEntryId String?
+  // Idempotency key for the monthly run, so re-running never double-posts.
+  runKey        String?
+  createdAt     DateTime      @default(now())
+
+  lines            InvoiceLine[]
+  paymentApplications PaymentApplication[]
+
+  @@unique([orgId, legalEntityId, ownerPartyId, runKey])
+  @@index([orgId, legalEntityId, ownerPartyId])
+  @@map("invoices")
+}
+
+model InvoiceLine {
+  id          String  @id @default(cuid())
+  invoiceId   String
+  horseId     String?
+  categoryId  String?
+  description String
+  amountCents BigInt
+
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@map("invoice_lines")
+}
+
+model Payment {
+  id            String           @id @default(cuid())
+  orgId         String
+  legalEntityId String
+  partyId       String
+  direction     PaymentDirection
+  method        PaymentMethod
+  amountCents   BigInt
+  receivedAt    DateTime
+  journalEntryId String?
+  createdAt     DateTime         @default(now())
+
+  applications PaymentApplication[]
+
+  @@index([orgId, legalEntityId, partyId])
+  @@map("payments")
+}
+
+model PaymentApplication {
+  id          String @id @default(cuid())
+  paymentId   String
+  invoiceId   String
+  amountCents BigInt
+
+  payment Payment @relation(fields: [paymentId], references: [id], onDelete: Cascade)
+  invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([paymentId])
+  @@index([invoiceId])
+  @@map("payment_applications")
+}
+
+// ---------------------------------------------------------------------------
+// Purse (Phase 2)
+// ---------------------------------------------------------------------------
+
+model Purse {
+  id             String   @id @default(cuid())
+  orgId          String
+  legalEntityId  String
+  horseId        String
+  raceId         String?
+  resultDate     DateTime
+  grossCents     BigInt
+  netToOwnerCents BigInt
+  journalEntryId String?
+  createdAt      DateTime @default(now())
+
+  allocations PurseAllocation[]
+
+  @@index([orgId, legalEntityId, horseId])
+  @@map("purses")
+}
+
+model PurseAllocation {
+  id          String @id @default(cuid())
+  purseId     String
+  partyId     String
+  amountCents BigInt
+
+  purse Purse @relation(fields: [purseId], references: [id], onDelete: Cascade)
+
+  @@index([purseId])
+  @@map("purse_allocations")
+}
+
+// ---------------------------------------------------------------------------
+// Racing (Phase 4)
+// ---------------------------------------------------------------------------
+
+model Race {
+  id        String   @id @default(cuid())
+  orgId     String
+  track     String
+  raceDate  DateTime
+  name      String?
+  createdAt DateTime @default(now())
+
+  entries RaceEntry[]
+
+  @@index([orgId, raceDate])
+  @@map("races")
+}
+
+model RaceEntry {
+  id        String          @id @default(cuid())
+  orgId     String
+  raceId    String
+  horseId   String
+  status    RaceEntryStatus @default(ENTERED)
+  feeCents  BigInt          @default(0)
+
+  race Race @relation(fields: [raceId], references: [id], onDelete: Cascade)
+
+  @@index([orgId, raceId])
+  @@map("race_entries")
+}
+
+model JockeyBooking {
+  id             String @id @default(cuid())
+  orgId          String
+  raceEntryId    String
+  jockeyPartyId  String
+  mountFeeCents  BigInt @default(0)
+  winPctBp       Int    @default(0)
+  placePctBp     Int    @default(0)
+  showPctBp      Int    @default(0)
+
+  @@index([orgId, raceEntryId])
+  @@map("jockey_bookings")
+}
+
+model StakesSchedule {
+  id        String   @id @default(cuid())
+  orgId     String
+  horseId   String
+  raceName  String
+  createdAt DateTime @default(now())
+
+  payments StakesPayment[]
+
+  @@index([orgId, horseId])
+  @@map("stakes_schedules")
+}
+
+model StakesPayment {
+  id         String   @id @default(cuid())
+  scheduleId String
+  label      String
+  dueDate    DateTime
+  amountCents BigInt
+  paid       Boolean  @default(false)
+
+  schedule StakesSchedule @relation(fields: [scheduleId], references: [id], onDelete: Cascade)
+
+  @@index([scheduleId])
+  @@map("stakes_payments")
+}
+
+model Reminder {
+  id         String   @id @default(cuid())
+  orgId      String
+  entityType String
+  entityId   String
+  dueDate    DateTime
+  message    String
+  resolved   Boolean  @default(false)
+  createdAt  DateTime @default(now())
+
+  @@index([orgId, dueDate])
+  @@map("reminders")
+}
+
+// ---------------------------------------------------------------------------
+// Payments rail & bank reconciliation (Phase 3)
+// ---------------------------------------------------------------------------
+
+model PaymentIntent {
+  id              String   @id @default(cuid())
+  orgId           String
+  legalEntityId   String
+  invoiceId       String?
+  provider        String
+  providerIntentId String  @unique
+  amountCents     BigInt
+  status          String
+  createdAt       DateTime @default(now())
+
+  @@index([orgId, legalEntityId])
+  @@map("payment_intents")
+}
+
+model BankAccount {
+  id            String   @id @default(cuid())
+  orgId         String
+  legalEntityId String
+  name          String
+  externalId    String?
+  createdAt     DateTime @default(now())
+
+  transactions BankTransaction[]
+
+  @@index([orgId, legalEntityId])
+  @@map("bank_accounts")
+}
+
+model BankTransaction {
+  id            String   @id @default(cuid())
+  bankAccountId String
+  postedAt      DateTime
+  amountCents   BigInt
+  description   String
+  matchedEntryId String?
+
+  bankAccount BankAccount @relation(fields: [bankAccountId], references: [id], onDelete: Cascade)
+
+  @@index([bankAccountId, postedAt])
+  @@map("bank_transactions")
+}
+
+// ---------------------------------------------------------------------------
+// Operational breadth (Phase 5)
+// ---------------------------------------------------------------------------
+
+model Employee {
+  id        String   @id @default(cuid())
+  orgId     String
+  partyId   String
+  isW2      Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  payrollLines PayrollLine[]
+
+  @@index([orgId])
+  @@map("employees")
+}
+
+model PayrollRun {
+  id            String   @id @default(cuid())
+  orgId         String
+  legalEntityId String
+  periodStart   DateTime
+  periodEnd     DateTime
+  journalEntryId String?
+  createdAt     DateTime @default(now())
+
+  lines PayrollLine[]
+
+  @@index([orgId, legalEntityId])
+  @@map("payroll_runs")
+}
+
+model PayrollLine {
+  id           String @id @default(cuid())
+  payrollRunId String
+  employeeId   String
+  grossCents   BigInt
+
+  run      PayrollRun @relation(fields: [payrollRunId], references: [id], onDelete: Cascade)
+  employee Employee   @relation(fields: [employeeId], references: [id], onDelete: Cascade)
+
+  @@index([payrollRunId])
+  @@map("payroll_lines")
+}
+
+model Shipment {
+  id         String   @id @default(cuid())
+  orgId      String
+  shipDate   DateTime
+  fromLoc    String
+  toLoc      String
+  totalCents BigInt
+  createdAt  DateTime @default(now())
+
+  horses ShipmentHorse[]
+
+  @@index([orgId, shipDate])
+  @@map("shipments")
+}
+
+model ShipmentHorse {
+  id         String @id @default(cuid())
+  shipmentId String
+  horseId    String
+  costCents  BigInt
+
+  shipment Shipment @relation(fields: [shipmentId], references: [id], onDelete: Cascade)
+
+  @@index([shipmentId])
+  @@map("shipment_horses")
+}
+
+model InsurancePolicy {
+  id           String   @id @default(cuid())
+  orgId        String
+  horseId      String?
+  carrier      String
+  premiumCents BigInt
+  startDate    DateTime
+  endDate      DateTime
+
+  claims InsuranceClaim[]
+
+  @@index([orgId])
+  @@map("insurance_policies")
+}
+
+model InsuranceClaim {
+  id             String   @id @default(cuid())
+  policyId       String
+  filedDate      DateTime
+  recoveryCents  BigInt   @default(0)
+
+  policy InsurancePolicy @relation(fields: [policyId], references: [id], onDelete: Cascade)
+
+  @@index([policyId])
+  @@map("insurance_claims")
+}
+
+model InventoryItem {
+  id             String @id @default(cuid())
+  orgId          String
+  name           String
+  unitCostCents  BigInt
+  perHorsePerDay Boolean @default(false)
+
+  @@index([orgId])
+  @@map("inventory_items")
+}
+
+// ---------------------------------------------------------------------------
+// Asset & tax (Phase 6)
+// ---------------------------------------------------------------------------
+
+model HorseTransaction {
+  id            String   @id @default(cuid())
+  orgId         String
+  legalEntityId String
+  horseId       String
+  kind          String // PURCHASE | SALE
+  amountCents   BigInt
+  basisCents    BigInt?
+  date          DateTime
+  journalEntryId String?
+  createdAt     DateTime @default(now())
+
+  @@index([orgId, legalEntityId, horseId])
+  @@map("horse_transactions")
+}
+
+// ---------------------------------------------------------------------------
+// Import & files
+// ---------------------------------------------------------------------------
+
+model ImportTemplate {
+  id        String   @id @default(cuid())
+  orgId     String
+  name      String
+  mapping   Json
+  createdAt DateTime @default(now())
+
+  @@index([orgId])
+  @@map("import_templates")
+}
+
+model Attachment {
+  id         String   @id @default(cuid())
+  orgId      String
+  entityType String
+  entityId   String
+  url        String
+  mimeType   String?
+  createdAt  DateTime @default(now())
+
+  @@index([orgId, entityType, entityId])
+  @@map("attachments")
+}

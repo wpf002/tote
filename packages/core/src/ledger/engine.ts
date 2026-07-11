@@ -36,7 +36,10 @@ export class Ledger {
    * `sum(debits) === sum(credits)` (invariant #4) and every line carries exactly
    * one non-negative side. Returns the immutable posted entry.
    */
-  postEntry(entry: JournalEntryInput, lines: ReadonlyArray<JournalLineInput>): PostedEntry {
+  async postEntry(
+    entry: JournalEntryInput,
+    lines: ReadonlyArray<JournalLineInput>,
+  ): Promise<PostedEntry> {
     if (lines.length === 0) {
       throw new Error("A journal entry must have at least one line");
     }
@@ -79,7 +82,7 @@ export class Ledger {
       lines: postedLines,
     };
 
-    this.store.append(posted);
+    await this.store.append(posted);
     return posted;
   }
 
@@ -89,9 +92,9 @@ export class Ledger {
    * credit-normal kind reports `credits - debits`. Optional dimensions filter
    * the lines (AND-combined); omitted dimensions aggregate across.
    */
-  balanceOf(accountKind: AccountKind, dimensions: Dimensions = {}): Cents {
+  async balanceOf(accountKind: AccountKind, dimensions: Dimensions = {}): Promise<Cents> {
     const filter: LineFilter = { accountKind, ...pickDimensions(dimensions) };
-    const lines = this.store.queryLines(this.scope, filter);
+    const lines = await this.store.queryLines(this.scope, filter);
 
     let debits = ZERO;
     let credits = ZERO;
@@ -107,8 +110,8 @@ export class Ledger {
    * balances to their pre-entry state. Corrections are reversals — nothing is
    * edited or deleted. The original must belong to this tenant.
    */
-  reverseEntry(entryId: string, reason: string): PostedEntry {
-    const original = this.store.getEntry(this.scope, entryId);
+  async reverseEntry(entryId: string, reason: string): Promise<PostedEntry> {
+    const original = await this.store.getEntry(this.scope, entryId);
     if (!original) {
       throw new Error(`Cannot reverse ${entryId}: not found in this tenant`);
     }
@@ -130,9 +133,9 @@ export class Ledger {
    * Net position of a party: what we owe them on purses minus what they owe us
    * on invoices. Positive means Tote's books owe the party.
    */
-  netPosition(partyId: string): Cents {
-    const payable = this.balanceOf("OWNER_PURSE_PAYABLE", { partyId });
-    const receivable = this.balanceOf("ACCOUNTS_RECEIVABLE", { partyId });
+  async netPosition(partyId: string): Promise<Cents> {
+    const payable = await this.balanceOf("OWNER_PURSE_PAYABLE", { partyId });
+    const receivable = await this.balanceOf("ACCOUNTS_RECEIVABLE", { partyId });
     return sub(payable, receivable);
   }
 }

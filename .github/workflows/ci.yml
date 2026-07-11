@@ -8,6 +8,25 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
+
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: tote
+          POSTGRES_PASSWORD: tote
+          POSTGRES_DB: tote
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U tote"
+          --health-interval 2s
+          --health-timeout 5s
+          --health-retries 15
+
+    env:
+      DATABASE_URL: postgresql://tote:tote@localhost:5432/tote?schema=public
+
     steps:
       - uses: actions/checkout@v4
 
@@ -22,8 +41,14 @@ jobs:
 
       - run: pnpm install --frozen-lockfile
 
+      - name: Generate Prisma client
+        run: pnpm --filter @tote/db generate
+
+      - name: Apply migrations
+        run: pnpm --filter @tote/db exec prisma migrate deploy
+
       - name: Typecheck
         run: pnpm -r typecheck
 
-      - name: Test (unit + property)
+      - name: Test (unit + property + integration)
         run: pnpm -r test

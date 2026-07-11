@@ -1,0 +1,21 @@
+# Local dev / test Postgres. Port 55432 to avoid clashing with a system Postgres.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: tote-pg
+    environment:
+      POSTGRES_USER: tote
+      POSTGRES_PASSWORD: tote
+      POSTGRES_DB: tote
+    ports:
+      - "55432:5432"
+    volumes:
+      - tote_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U tote"]
+      interval: 2s
+      timeout: 5s
+      retries: 15
+
+volumes:
+  tote_pg_data:
