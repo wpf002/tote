@@ -1,0 +1,148 @@
+import { getLedger, getTenant } from "@/lib/tenant";
+import { prisma } from "@/lib/db";
+import { loadOwnershipGraph } from "@/lib/ownership";
+import { resolveEffectiveOwnership } from "@tote/core";
+import { fmt, fmtBps } from "@/lib/money";
+import {
+  Card,
+  CardHeader,
+  StatTile,
+  Table,
+  THead,
+  TH,
+  TR,
+  TD,
+  EmptyState,
+} from "@/components/ui";
+
+export const dynamic = "force-dynamic";
+
+export default async function PortalPage() {
+  const { orgId, user } = await getTenant();
+
+  if (!user.partyId) {
+    return (
+      <Card>
+        <EmptyState
+          title="No linked owner account"
+          hint="This login isn't associated with an ownership party."
+        />
+      </Card>
+    );
+  }
+
+  const partyId = user.partyId;
+  const ledger = await getLedger();
+  const [party, receivable, pursePayable, net, graph, horses, lines] = await Promise.all([
+    prisma.party.findFirst({ where: { id: partyId, orgId } }),
+    ledger.balanceOf("ACCOUNTS_RECEIVABLE", { partyId }),
+    ledger.balanceOf("OWNER_PURSE_PAYABLE", { partyId }),
+    ledger.netPosition(partyId),
+    loadOwnershipGraph(orgId),
+    prisma.horse.findMany({ where: { orgId }, orderBy: { name: "asc" } }),
+    prisma.journalLine.findMany({
+      where: { orgId, partyId },
+      include: { entry: true },
+      orderBy: { entry: { date: "desc" } },
+      take: 30,
+    }),
+  ]);
+
+  const now = new Date();
+  const myHorses = horses
+    .map((h) => {
+      try {
+        const share = resolveEffectiveOwnership(graph, h.id, now).find((s) => s.partyId === partyId);
+        return share ? { name: h.name, bps: share.basisPoints } : null;
+      } catch {
+        return null;
+      }
+    })
+    .filter((x): x is { name: string; bps: number } => x !== null);
+
+  return (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-semibold tracking-tight">Welcome, {party?.name}</h1>
+        <p className="mt-1 text-sm text-muted">Your statement and holdings</p>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        <StatTile label="You owe" value={fmt(receivable)} tone={receivable > 0n ? "negative" : "default"} />
+        <StatTile label="Purse due to you" value={fmt(pursePayable)} tone="positive" />
+        <StatTile
+          label="Net position"
+          value={fmt(net)}
+          tone={net > 0n ? "positive" : net < 0n ? "negative" : "default"}
+        />
+      </div>
+
+      <Card>
+        <CardHeader title="Your horses" />
+        {myHorses.length === 0 ? (
+          <EmptyState title="No current holdings" />
+        ) : (
+          <Table>
+            <THead>
+              <tr>
+                <TH>Horse</TH>
+                <TH right>Your share</TH>
+              </tr>
+            </THead>
+            <tbody>
+              {myHorses.map((h) => (
+                <TR key={h.name}>
+                  <TD>{h.name}</TD>
+                  <TD right mono>
+                    {fmtBps(h.bps)}
+                  </TD>
+                </TR>
+              ))}
+            </tbody>
+          </Table>
+        )}
+      </Card>
+
+      <Card>
+        <CardHeader title="Statement" subtitle="Charges and credits on your account" />
+        {lines.length === 0 ? (
+          <EmptyState title="No activity yet" />
+        ) : (
+          <Table>
+            <THead>
+              <tr>
+                <TH>Date</TH>
+                <TH>Description</TH>
+                <TH right>Charge</TH>
+                <TH right>Credit</TH>
+              </tr>
+            </THead>
+            <tbody>
+              {lines.map((l) => {
+                const charge = l.accountKind === "ACCOUNTS_RECEIVABLE" ? l.debit : 0n;
+                const credit =
+                  l.accountKind === "ACCOUNTS_RECEIVABLE"
+                    ? l.credit
+                    : l.accountKind === "OWNER_PURSE_PAYABLE"
+                      ? l.credit
+                      : 0n;
+                return (
+                  <TR key={l.id}>
+                    <TD>{l.entry.date.toISOString().slice(0, 10)}</TD>
+                    <TD>{l.entry.memo ?? "—"}</TD>
+                    <TD right mono>
+                      {charge > 0n ? fmt(charge) : ""}
+                    </TD>
+                    <TD right mono>
+                      {credit > 0n ? fmt(credit) : ""}
+                    </TD>
+                  </TR>
+                );
+              })}
+            </tbody>
+          </Table>
+        )}
+      </Card>
+    </div>
+  );
+}

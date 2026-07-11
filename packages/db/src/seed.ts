@@ -21,6 +21,8 @@ const LE_SYNDICATE = "le_syndicate";
 const FROM = new Date("2025-01-01T00:00:00Z");
 
 async function wipe() {
+  await prisma.vendorBill.deleteMany({ where: { orgId: ORG } });
+  await prisma.purse.deleteMany({ where: { orgId: ORG } });
   await prisma.journalEntry.deleteMany({ where: { orgId: ORG } });
   await prisma.ownership.deleteMany({ where: { orgId: ORG } });
   await prisma.syndicateMembership.deleteMany({ where: { orgId: ORG } });
@@ -174,7 +176,19 @@ async function main() {
       horseId: b.horse,
       categoryId: b.cat,
     });
-    await ledger.postEntry({ date: d(b.date), memo: draft.memo }, draft.lines);
+    const entry = await ledger.postEntry({ date: d(b.date), memo: draft.memo }, draft.lines);
+    await prisma.vendorBill.create({
+      data: {
+        orgId: ORG,
+        legalEntityId: LE_TRAINING,
+        vendorPartyId: b.vendor,
+        horseId: b.horse,
+        status: "APPROVED",
+        billDate: d(b.date),
+        journalEntryId: entry.id,
+        lines: { create: [{ categoryId: b.cat, description: "Services", amountCents: BigInt(b.amount) }] },
+      },
+    });
   }
 
   // Monthly training charges, split to leaf owners by ownership.
@@ -197,8 +211,20 @@ async function main() {
   await ledger.postEntry({ date: d("2026-07-02"), memo: "Owner payment — Bob Carter" }, pay.lines);
 
   // Silk Road hits the board: $12,000 net to owners, $1,500 trainer cut.
-  const { draft } = disburse(graph, "h_silk", d("2026-07-05"), cents(1_200_000n), cents(150_000n));
-  await ledger.postEntry({ date: d("2026-07-05"), memo: draft.memo }, draft.lines);
+  const { allocations, draft } = disburse(graph, "h_silk", d("2026-07-05"), cents(1_200_000n), cents(150_000n));
+  const purseEntry = await ledger.postEntry({ date: d("2026-07-05"), memo: draft.memo }, draft.lines);
+  await prisma.purse.create({
+    data: {
+      orgId: ORG,
+      legalEntityId: LE_TRAINING,
+      horseId: "h_silk",
+      resultDate: d("2026-07-05"),
+      grossCents: 1_350_000n,
+      netToOwnerCents: 1_200_000n,
+      journalEntryId: purseEntry.id,
+      allocations: { create: allocations.map((a) => ({ partyId: a.partyId, amountCents: a.amount })) },
+    },
+  });
 
   console.log("Seeded Meadowbrook Racing:");
   console.log("  staff login → staff@meadowbrook.test / tote1234");

@@ -15,5 +15,5 @@ export async function login(_prev: unknown, formData: FormData): Promise<{ error
   }
 
   await createSession(user.id);
-  redirect("/dashboard");
+  redirect(user.role === "OWNER_PORTAL" ? "/portal" : "/dashboard");
 }

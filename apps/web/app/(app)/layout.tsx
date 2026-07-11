@@ -1,4 +1,4 @@
-import Link from "next/link";
+import { redirect } from "next/navigation";
 import { getTenant } from "@/lib/tenant";
 import { Sidebar } from "@/components/sidebar";
 import { EntitySwitcher } from "@/components/entity-switcher";
@@ -6,6 +6,8 @@ import { logout } from "./actions";
 
 export default async function AppLayout({ children }: { children: React.ReactNode }) {
   const { user, legalEntityId, legalEntities } = await getTenant();
+  // Owner-portal users never see the staff app.
+  if (user.role === "OWNER_PORTAL") redirect("/portal");
 
   return (
     <div className="flex min-h-screen">
