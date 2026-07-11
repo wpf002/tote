@@ -1,0 +1,26 @@
+{
+  "name": "@tote/core",
+  "version": "0.0.0",
+  "private": true,
+  "description": "Money layer, ownership resolver, and immutable posting engine — the financial spine of Tote.",
+  "type": "module",
+  "main": "./src/index.ts",
+  "types": "./src/index.ts",
+  "exports": {
+    ".": "./src/index.ts",
+    "./money": "./src/money/index.ts",
+    "./ownership": "./src/ownership/index.ts",
+    "./ledger": "./src/ledger/index.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "build": "tsc -p tsconfig.build.json"
+  },
+  "devDependencies": {
+    "fast-check": "^3.23.1",
+    "typescript": "^5.6.3",
+    "vitest": "^2.1.4"
+  }
+}
