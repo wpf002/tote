@@ -29,8 +29,13 @@ packages/
     test/          unit + fast-check property tests for every invariant
   db/              @tote/db — Prisma schema, migrations, Postgres LedgerStore
     prisma/        41-model domain schema + initial migration
-    src/           PrismaLedgerStore (same LedgerStore contract as core)
+    src/           PrismaLedgerStore (same contract as core) + seed
     test/          integration tests against a real Postgres
+apps/
+  web/             @tote/web — Next.js app (staff console + owner portal)
+    app/           dashboard, horses, owners, vendor bills, invoices, purses, portal
+    lib/           auth (sessions), tenant context, ledger wiring, ownership loader
+    components/    fintech design system (cards, tables, stat tiles)
 ```
 
 ## Status — Phase 0 (Foundation)
@@ -60,18 +65,38 @@ random nested trees stay penny-exact; any posting sequence's derived balance
 matches the hand-summed expected (in-memory **and** on Postgres); reversals
 restore balances; no query crosses a tenant boundary.
 
-Next in Phase 0: auth/sessions, and the multi-tenancy request middleware.
+### Web app (`@tote/web`)
+
+A Next.js 14 App Router app on the Postgres ledger, with a fintech-clean design
+system (turf-green brand, light/dark):
+
+- **Auth** — session cookies over the `User`/`Session` models (bcrypt),
+  role-routed: staff → console, owners → portal.
+- **Multi-tenant** — every page resolves org + active legal entity; an entity
+  switcher swaps books. No query crosses the boundary.
+- **Staff console** — dashboard (derived balances), horses (ownership resolver
+  shown live, syndicates expanded to leaf partners), owners (net position +
+  statement), vendor bills (create → posts to the ledger), invoices/statements,
+  and purses (record → penny-exact disbursement across nested partners).
+- **Owner portal** — read-only holdings, net position, and statement, scoped to
+  the owner's own party.
+
+Everything on screen is derived from the immutable ledger and reconciles to the
+penny.
 
 ## Develop
 
 ```bash
 pnpm install
+pnpm db:up                # ephemeral Postgres on :55432 (Docker)
 pnpm db:generate          # generate the Prisma client
+pnpm db:migrate           # apply migrations
+pnpm db:seed              # demo barn (staff@meadowbrook.test / tote1234)
+pnpm dev                  # web app on :3000
+
 pnpm -r typecheck
 pnpm -r test              # unit + property tests (DB integration auto-skips)
-
-# Integration tests against a real Postgres (Docker):
-pnpm test:integration     # spins up pg on :55432, migrates, runs @tote/db tests
+pnpm test:integration     # migrates + runs @tote/db tests against Postgres
 ```
 
-Requires Node >= 18 and pnpm 9. Integration tests and migrations need Docker.
+Requires Node >= 18 and pnpm 9. The DB, migrations, and integration tests need Docker.
