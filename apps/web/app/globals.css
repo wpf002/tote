@@ -1,0 +1,53 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  --bg: 247 248 246;
+  --surface: 255 255 255;
+  --surface-2: 244 246 244;
+  --border: 226 230 226;
+  --fg: 17 27 22;
+  --muted: 100 116 108;
+  --brand: 14 124 102; /* turf green */
+  --brand-soft: 219 240 233;
+  --brand-fg: 255 255 255;
+  --gold: 176 141 62;
+  --positive: 21 128 61;
+  --negative: 190 42 42;
+  --font-sans: "Inter", ui-sans-serif, system-ui, sans-serif;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: 12 17 15;
+    --surface: 20 27 23;
+    --surface-2: 27 36 31;
+    --border: 40 51 44;
+    --fg: 232 238 234;
+    --muted: 148 163 154;
+    --brand: 45 168 141;
+    --brand-soft: 24 52 45;
+    --brand-fg: 8 14 11;
+    --gold: 201 162 74;
+    --positive: 74 194 118;
+    --negative: 233 110 110;
+  }
+}
+
+html {
+  color-scheme: light dark;
+}
+
+body {
+  background: rgb(var(--bg));
+  color: rgb(var(--fg));
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+/* Tabular figures for money columns. */
+.tabnum {
+  font-variant-numeric: tabular-nums;
+  font-feature-settings: "tnum";
+}

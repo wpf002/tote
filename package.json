@@ -17,6 +17,8 @@
     "db:down": "docker compose down",
     "db:generate": "pnpm --filter @tote/db generate",
     "db:migrate": "pnpm --filter @tote/db migrate:dev",
+    "db:seed": "pnpm --filter @tote/db seed",
+    "dev": "pnpm --filter @tote/web dev",
     "test:integration": "pnpm db:up && DATABASE_URL=postgresql://tote:tote@localhost:55432/tote?schema=public pnpm --filter @tote/db exec prisma migrate deploy && DATABASE_URL=postgresql://tote:tote@localhost:55432/tote?schema=public pnpm --filter @tote/db test"
   },
   "devDependencies": {
