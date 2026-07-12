@@ -3,6 +3,7 @@ import { notFound } from "next/navigation";
 import { getLedger, getTenant } from "@/lib/tenant";
 import { prisma } from "@/lib/db";
 import { fmt } from "@/lib/money";
+import { applyCredit } from "../actions";
 import {
   Card,
   CardHeader,
@@ -13,6 +14,7 @@ import {
   TR,
   TD,
   Badge,
+  Button,
   EmptyState,
 } from "@/components/ui";
 
@@ -61,6 +63,21 @@ export default async function OwnerDetail({ params }: { params: { id: string } }
           tone={net > 0n ? "positive" : net < 0n ? "negative" : "default"}
         />
       </div>
+
+      {pursePayable > 0n && receivable > 0n ? (
+        <Card>
+          <CardHeader
+            title="Net purse credit against invoices"
+            subtitle={`Apply up to ${fmt(pursePayable < receivable ? pursePayable : receivable)} of purse payable to this owner's outstanding invoices`}
+            action={
+              <form action={applyCredit}>
+                <input type="hidden" name="partyId" value={party.id} />
+                <Button type="submit">Apply purse credit</Button>
+              </form>
+            }
+          />
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader title="Statement" subtitle="Every ledger line tagged to this party" />

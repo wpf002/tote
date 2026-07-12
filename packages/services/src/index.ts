@@ -9,6 +9,7 @@ export {
   type MonthlyRunResult,
 } from "./billing.js";
 export { recordOwnerPayment, type PaymentApplicationInput } from "./payments.js";
+export { recordAndDisbursePurse, applyPurseCreditToInvoices } from "./purse.js";
 export {
   parseCsv,
   importVendorBills,
