@@ -47,7 +47,7 @@ export default async function TaxPage({ searchParams }: { searchParams: { year?:
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader title="Buy a horse" subtitle="Capitalizes the cost basis" />
+          <CardHeader title="Buy a Horse" subtitle="Capitalizes the cost basis" />
           <form action={purchaseHorse} className="space-y-3 p-5">
             <Field label="Horse">
               <select name="horseId" required className={inputClass} defaultValue="">
@@ -69,12 +69,12 @@ export default async function TaxPage({ searchParams }: { searchParams: { year?:
                 <input name="date" type="date" defaultValue={today} className={inputClass} />
               </Field>
             </div>
-            <Button type="submit">Record purchase</Button>
+            <Button type="submit">Record Purchase</Button>
           </form>
         </Card>
 
         <Card>
-          <CardHeader title="Sell a horse" subtitle="Computes and posts gain or loss vs. basis" />
+          <CardHeader title="Sell a Horse" subtitle="Computes and posts gain or loss vs. basis" />
           <form action={sellHorse} className="space-y-3 p-5">
             <Field label="Horse">
               <select name="horseId" required className={inputClass} defaultValue="">
@@ -96,14 +96,14 @@ export default async function TaxPage({ searchParams }: { searchParams: { year?:
                 <input name="date" type="date" defaultValue={today} className={inputClass} />
               </Field>
             </div>
-            <Button type="submit">Record sale</Button>
+            <Button type="submit">Record Sale</Button>
           </form>
         </Card>
       </div>
 
       {transactions.length > 0 ? (
         <Card>
-          <CardHeader title="Horse transactions" />
+          <CardHeader title="Horse Transactions" />
           <Table>
             <THead>
               <tr>
@@ -157,7 +157,7 @@ export default async function TaxPage({ searchParams }: { searchParams: { year?:
           }
         />
         {forms.length === 0 ? (
-          <EmptyState title="No 1099s for this year" hint="No contractor crossed the $600 threshold." />
+          <EmptyState title="No 1099s for This Year" hint="No contractor crossed the $600 threshold." />
         ) : (
           <Table>
             <THead>

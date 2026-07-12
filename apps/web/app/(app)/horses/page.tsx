@@ -49,7 +49,7 @@ export default async function HorsesPage({
 
       <Card>
         {horses.length === 0 ? (
-          <EmptyState title="No horses yet" />
+          <EmptyState title="No Horses Yet" />
         ) : (
           <Table>
             <THead>

@@ -38,13 +38,13 @@ export default async function PursesPage() {
             Recorded purses, disbursed to every partner — including nested syndicate members
           </p>
         </div>
-        <LinkButton href="/purses/new">+ Record purse</LinkButton>
+        <LinkButton href="/purses/new">+ Record Purse</LinkButton>
       </div>
 
       {purses.length === 0 ? (
         <Card>
           <EmptyState
-            title="No purses recorded yet"
+            title="No Purses Recorded Yet"
             hint="Record one to split owner-net across partners, penny-exact."
           />
         </Card>

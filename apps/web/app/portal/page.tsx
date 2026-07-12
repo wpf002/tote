@@ -27,7 +27,7 @@ export default async function PortalPage() {
     return (
       <Card>
         <EmptyState
-          title="No linked owner account"
+          title="No Linked Owner Account"
           hint="This login isn't associated with an ownership party."
         />
       </Card>
@@ -95,7 +95,7 @@ export default async function PortalPage() {
 
       {outstandingInvoices.length > 0 ? (
         <Card>
-          <CardHeader title="Pay online" subtitle="Card or ACH — funds settle straight to the barn" />
+          <CardHeader title="Pay Online" subtitle="Card or ACH — funds settle straight to the barn" />
           <Table>
             <THead>
               <tr>
@@ -128,9 +128,9 @@ export default async function PortalPage() {
       ) : null}
 
       <Card>
-        <CardHeader title="Your horses" />
+        <CardHeader title="Your Horses" />
         {myHorses.length === 0 ? (
-          <EmptyState title="No current holdings" />
+          <EmptyState title="No Current Holdings" />
         ) : (
           <Table>
             <THead>
@@ -156,7 +156,7 @@ export default async function PortalPage() {
       <Card>
         <CardHeader title="Statement" subtitle="Charges and credits on your account" />
         {lines.length === 0 ? (
-          <EmptyState title="No activity yet" />
+          <EmptyState title="No Activity Yet" />
         ) : (
           <Table>
             <THead>

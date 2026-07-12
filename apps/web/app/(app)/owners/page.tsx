@@ -32,7 +32,7 @@ export default async function OwnersPage() {
 
       <Card>
         {rows.length === 0 ? (
-          <EmptyState title="No owners yet" />
+          <EmptyState title="No Owners Yet" />
         ) : (
           <Table>
             <THead>

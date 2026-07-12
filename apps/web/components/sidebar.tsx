@@ -34,7 +34,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
     ],
   },
   {
-    title: "Month-end",
+    title: "Month-End",
     items: [
       { href: "/reconcile", label: "Reconcile", icon: "⇄" },
       { href: "/audit", label: "Ledger Audit", icon: "✓" },
@@ -93,7 +93,7 @@ export function Sidebar() {
         <span aria-hidden className="text-brand">
           ✦
         </span>
-        Ask your books…
+        Ask Your Books…
       </Link>
 
       {GROUPS.map((group) => (

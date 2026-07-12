@@ -57,7 +57,7 @@ export default async function InvoicesPage() {
             <span className="mb-1 block text-xs font-medium text-muted">Run month</span>
             <input type="month" name="month" defaultValue={defaultMonth()} className={inputClass} />
           </label>
-          <Button type="submit">Run monthly invoices</Button>
+          <Button type="submit">Run Monthly Invoices</Button>
         </form>
       </div>
 
@@ -68,10 +68,10 @@ export default async function InvoicesPage() {
       </div>
 
       <Card>
-        <CardHeader title="All invoices" subtitle="Idempotent per month — re-running never double-bills" />
+        <CardHeader title="All Invoices" subtitle="Idempotent per month — re-running never double-bills" />
         {invoices.length === 0 ? (
           <EmptyState
-            title="No invoices yet"
+            title="No Invoices Yet"
             hint="Pick a month and run the billing to generate owner invoices."
           />
         ) : (

@@ -52,12 +52,12 @@ export default async function ReconcilePage() {
 
       <div className="grid grid-cols-3 gap-4">
         <StatTile label="Reconciled" value={String(matchedCount)} tone="positive" />
-        <StatTile label="Proposed matches" value={String(matches.length)} tone="brand" />
+        <StatTile label="Proposed Matches" value={String(matches.length)} tone="brand" />
         <StatTile label="Unmatched" value={String(unmatched.length)} tone={unmatched.length ? "negative" : "default"} />
       </div>
 
       <Card>
-        <CardHeader title="Import bank transactions" subtitle="Paste a CSV export from your bank" />
+        <CardHeader title="Import Bank Transactions" subtitle="Paste a CSV export from your bank" />
         <form action={importBank} className="space-y-3 p-5">
           <textarea
             name="csv"
@@ -66,18 +66,18 @@ export default async function ReconcilePage() {
             spellCheck={false}
             className={inputClass + " font-mono text-xs"}
           />
-          <Button type="submit">Import transactions</Button>
+          <Button type="submit">Import Transactions</Button>
         </form>
       </Card>
 
       {matches.length > 0 ? (
         <Card>
           <CardHeader
-            title="Proposed matches"
+            title="Proposed Matches"
             subtitle="Bank line ↔ ledger cash movement, by amount and date"
             action={
               <form action={commitAllMatches}>
-                <Button type="submit">Reconcile all</Button>
+                <Button type="submit">Reconcile All</Button>
               </form>
             }
           />
@@ -109,9 +109,9 @@ export default async function ReconcilePage() {
       ) : null}
 
       <Card>
-        <CardHeader title="Unmatched bank lines" subtitle="No ledger movement found — investigate or post one" />
+        <CardHeader title="Unmatched Bank Lines" subtitle="No Ledger Movement Found — Investigate or Post One" />
         {unmatched.length === 0 ? (
-          <EmptyState title="Everything ties out" hint="No unmatched bank transactions." />
+          <EmptyState title="Everything Ties Out" hint="No unmatched bank transactions." />
         ) : (
           <Table>
             <THead>

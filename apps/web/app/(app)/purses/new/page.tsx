@@ -23,7 +23,7 @@ export default async function NewPurse() {
 
       <Card>
         <CardHeader
-          title="Record a purse"
+          title="Record a Purse"
           subtitle="Splits owner-net across owners as of the result date, resolving nested syndicates"
         />
         <form action={recordPurse} className="space-y-4 p-5">
@@ -54,7 +54,7 @@ export default async function NewPurse() {
           </Field>
 
           <div className="flex items-center gap-3 pt-2">
-            <Button type="submit">Record & disburse</Button>
+            <Button type="submit">Record & Disburse</Button>
             <LinkButton href="/purses" variant="ghost">
               Cancel
             </LinkButton>

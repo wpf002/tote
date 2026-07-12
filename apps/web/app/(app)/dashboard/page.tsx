@@ -58,9 +58,9 @@ export default async function DashboardPage() {
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="lg:col-span-2">
           <Card>
-            <CardHeader title="Recent ledger activity" subtitle="Immutable journal entries, most recent first" />
+            <CardHeader title="Recent Ledger Activity" subtitle="Immutable journal entries, most recent first" />
             {entries.length === 0 ? (
-              <EmptyState title="No entries yet" hint="Post a vendor bill or record a purse to see activity." />
+              <EmptyState title="No Entries Yet" hint="Post a vendor bill or record a purse to see activity." />
             ) : (
               <Table>
                 <THead>

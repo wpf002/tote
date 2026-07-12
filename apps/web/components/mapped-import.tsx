@@ -93,7 +93,7 @@ export function MappedImport({
           ))}
         </div>
         <div className="flex items-center gap-3">
-          <Submit label={`Import ${title.toLowerCase()}`} />
+          <Submit label={`Import ${title}`} />
           {state.error ? <span className="text-sm text-negative">{state.error}</span> : null}
           {state.ok && state.summary
             ? state.summary.map((s, i) => (

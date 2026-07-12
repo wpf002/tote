@@ -107,7 +107,7 @@ export default async function HorseDetail({ params }: { params: { id: string } }
         {hasSyndicate ? (
           <Card>
             <CardHeader
-              title="Effective ownership"
+              title="Effective Ownership"
               subtitle="Resolved through syndicate membership to leaf partners"
             />
             <Table>
@@ -133,9 +133,9 @@ export default async function HorseDetail({ params }: { params: { id: string } }
       </div>
 
       <Card>
-        <CardHeader title="Ledger activity" subtitle="Every line tagged to this horse" />
+        <CardHeader title="Ledger Activity" subtitle="Every line tagged to this horse" />
         {lines.length === 0 ? (
-          <EmptyState title="No activity for this horse yet" />
+          <EmptyState title="No Activity for This Horse Yet" />
         ) : (
           <Table>
             <THead>

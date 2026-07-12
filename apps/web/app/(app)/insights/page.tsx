@@ -47,25 +47,27 @@ export default async function InsightsPage() {
 
       <Card>
         <CardHeader
-          title="AI insights"
+          title="AI Insights"
           subtitle="What a sharp CFO would flag — grounded in your ledger"
           action={<Badge tone={ai.enabled ? "brand" : "default"}>{ai.enabled ? "Claude Opus 4.8" : "not configured"}</Badge>}
         />
         {!ai.enabled ? (
           <EmptyState
-            title="Add an ANTHROPIC_API_KEY to enable AI insights"
+            title="Add an ANTHROPIC_API_KEY to Enable AI Insights"
             hint="Set it in the web app's environment; the copilot only reads the ledger, never writes it."
           />
         ) : ai.insights.length === 0 ? (
-          <EmptyState title="No insights right now" hint="Nothing in the books needs attention." />
+          <EmptyState title="No Insights Right Now" hint="Nothing in the books needs attention." />
         ) : (
           <ul className="divide-y divide-border/60">
             {ai.insights.map((ins, i) => (
-              <li key={i} className="flex items-start gap-3 px-5 py-4">
-                <Badge tone={ins.severity === "risk" ? "negative" : ins.severity === "watch" ? "gold" : "brand"}>
-                  {ins.severity}
-                </Badge>
-                <div>
+              <li key={i} className="flex items-start gap-4 px-5 py-4">
+                <span className="w-16 shrink-0 pt-0.5">
+                  <Badge tone={ins.severity === "risk" ? "negative" : ins.severity === "watch" ? "gold" : "brand"}>
+                    {ins.severity}
+                  </Badge>
+                </span>
+                <div className="min-w-0">
                   <div className="text-sm font-medium text-fg">{ins.title}</div>
                   <div className="mt-0.5 text-sm text-muted">{ins.detail}</div>
                 </div>
@@ -78,7 +80,7 @@ export default async function InsightsPage() {
       {offline ? (
         <Card>
           <EmptyState
-            title="Intelligence service offline"
+            title="Intelligence Service Offline"
             hint="Start it: cd apps/intelligence && uvicorn app.main:app --port 8000"
           />
         </Card>
@@ -86,7 +88,7 @@ export default async function InsightsPage() {
 
       {forecast ? (
         <div>
-          <h2 className="mb-3 text-sm font-semibold text-muted">90-day cash-flow forecast</h2>
+          <h2 className="mb-3 text-sm font-semibold text-muted">90-Day Cash-Flow Forecast</h2>
           <div className="grid grid-cols-2 gap-4 lg:grid-cols-4">
             <StatTile label="Opening cash" value={fmt(BigInt(forecast.summary.opening))} />
             <StatTile
@@ -111,7 +113,7 @@ export default async function InsightsPage() {
         <Card>
           <CardHeader title="Horse ROI" subtitle="Cost vs. earnings — lowest ROI first" />
           {roi.horses.length === 0 ? (
-            <EmptyState title="No horse data yet" />
+            <EmptyState title="No Horse Data Yet" />
           ) : (
             <Table>
               <THead>

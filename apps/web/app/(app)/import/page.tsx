@@ -23,7 +23,7 @@ export default function ImportPage() {
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Migrate a barn</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Migrate a Barn</h1>
         <p className="mt-1 text-sm text-muted">
           Bring a whole barn over from HorseBills or a spreadsheet — ownership, rates, and bills — with no manual
           re-entry. Pick a preset, paste, and go. Missing horses and owners are created automatically; ownership always
@@ -32,7 +32,7 @@ export default function ImportPage() {
       </div>
 
       <MappedImport
-        title="Ownership roster"
+        title="Ownership Roster"
         subtitle="One row per horse/owner/share. Shares normalize to exactly 100%."
         fields={[
           { key: "horse", label: "Horse column" },
@@ -49,7 +49,7 @@ export default function ImportPage() {
       />
 
       <MappedImport
-        title="Training rates"
+        title="Training Rates"
         subtitle="Per-horse daily rate in dollars."
         fields={[
           { key: "horse", label: "Horse column" },
@@ -64,7 +64,7 @@ export default function ImportPage() {
       />
 
       <MappedImport
-        title="Vendor bills"
+        title="Vendor Bills"
         subtitle="A month of expenses. Vendors, horses, and categories are created as needed."
         fields={[
           { key: "date", label: "Date column" },

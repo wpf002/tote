@@ -41,9 +41,9 @@ export default async function OperationsPage() {
       </div>
 
       <Card>
-        <CardHeader title="Accounts payable aging" subtitle="Outstanding vendor balances by age" />
+        <CardHeader title="Accounts Payable Aging" subtitle="Outstanding vendor balances by age" />
         {aging.length === 0 ? (
-          <EmptyState title="No outstanding payables" />
+          <EmptyState title="No Outstanding Payables" />
         ) : (
           <Table>
             <THead>
@@ -74,7 +74,7 @@ export default async function OperationsPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <Card>
-          <CardHeader title="Run payroll" subtitle="Posts Dr Labor / Cr Wages Payable" />
+          <CardHeader title="Run Payroll" subtitle="Posts Dr Labor / Cr Wages Payable" />
           <form action={runPayrollAction} className="space-y-3 p-5">
             {employees.length === 0 ? (
               <p className="text-sm text-muted">No employees.</p>
@@ -85,12 +85,12 @@ export default async function OperationsPage() {
                 </Field>
               ))
             )}
-            <Button type="submit">Run payroll</Button>
+            <Button type="submit">Run Payroll</Button>
           </form>
         </Card>
 
         <Card>
-          <CardHeader title="Record shipment" subtitle="Cost split evenly per horse" />
+          <CardHeader title="Record Shipment" subtitle="Cost split evenly per horse" />
           <form action={recordShipmentAction} className="space-y-3 p-5">
             <div className="grid grid-cols-2 gap-2">
               <input name="fromLoc" placeholder="From" className={inputClass} />
@@ -106,12 +106,12 @@ export default async function OperationsPage() {
                 </label>
               ))}
             </div>
-            <Button type="submit">Record shipment</Button>
+            <Button type="submit">Record Shipment</Button>
           </form>
         </Card>
 
         <Card>
-          <CardHeader title="Insurance policy" subtitle="Premium expense + renewal reminder" />
+          <CardHeader title="Insurance Policy" subtitle="Premium expense + renewal reminder" />
           <form action={recordInsuranceAction} className="space-y-3 p-5">
             <input name="carrier" placeholder="Carrier" className={inputClass} />
             <input name="premium" inputMode="decimal" placeholder="Premium" className={inputClass} />
@@ -127,7 +127,7 @@ export default async function OperationsPage() {
               <input name="startDate" type="date" defaultValue={today} className={inputClass} />
               <input name="endDate" type="date" className={inputClass} />
             </div>
-            <Button type="submit">Add policy</Button>
+            <Button type="submit">Add Policy</Button>
           </form>
         </Card>
       </div>

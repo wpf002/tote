@@ -18,7 +18,7 @@ export default async function PortalLayout({ children }: { children: React.React
           </div>
           <form action={logout}>
             <button className="rounded-lg border border-border px-3 py-1.5 text-xs font-medium text-muted transition hover:bg-surface-2 hover:text-fg">
-              Sign out
+              Sign Out
             </button>
           </form>
         </div>

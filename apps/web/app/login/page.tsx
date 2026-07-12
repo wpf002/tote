@@ -12,7 +12,7 @@ function SubmitButton() {
       disabled={pending}
       className="w-full rounded-lg bg-brand px-4 py-2.5 text-sm font-semibold text-brand-fg transition hover:opacity-90 disabled:opacity-60"
     >
-      {pending ? "Signing in…" : "Sign in"}
+      {pending ? "Signing In…" : "Sign In"}
     </button>
   );
 }

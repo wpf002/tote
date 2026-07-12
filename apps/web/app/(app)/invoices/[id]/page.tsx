@@ -60,7 +60,7 @@ export default async function InvoiceDetail({ params }: { params: { id: string }
       </div>
 
       <Card>
-        <CardHeader title="Line items" subtitle={`Owner: ${names.get(invoice.ownerPartyId) ?? invoice.ownerPartyId}`} />
+        <CardHeader title="Line Items" subtitle={`Owner: ${names.get(invoice.ownerPartyId) ?? invoice.ownerPartyId}`} />
         <Table>
           <THead>
             <tr>
@@ -97,7 +97,7 @@ export default async function InvoiceDetail({ params }: { params: { id: string }
 
       {outstanding > 0n ? (
         <Card>
-          <CardHeader title="Record payment" subtitle="Posts Dr Cash / Cr Receivable and applies to this invoice" />
+          <CardHeader title="Record Payment" subtitle="Posts Dr Cash / Cr Receivable and applies to this invoice" />
           <form action={payInvoice} className="flex items-end gap-3 p-5">
             <input type="hidden" name="invoiceId" value={invoice.id} />
             <label className="block">
@@ -118,7 +118,7 @@ export default async function InvoiceDetail({ params }: { params: { id: string }
                 <option>CASH</option>
               </select>
             </label>
-            <Button type="submit">Record payment</Button>
+            <Button type="submit">Record Payment</Button>
           </form>
         </Card>
       ) : null}

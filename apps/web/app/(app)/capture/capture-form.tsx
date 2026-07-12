@@ -123,7 +123,7 @@ export function CaptureForm({
       </div>
 
       <Card>
-        <CardHeader title="New expense" subtitle="Vendor + amount is enough" />
+        <CardHeader title="New Expense" subtitle="Vendor + amount is enough" />
         <form ref={formRef} onSubmit={onSubmit} className="space-y-4 p-5">
           <Field label="Vendor">
             <select name="vendorPartyId" required className={inputClass} defaultValue="">
@@ -165,14 +165,14 @@ export function CaptureForm({
           <Field label="Note">
             <input name="description" className={inputClass} placeholder="e.g. bute, wraps" />
           </Field>
-          <Button type="submit">Capture expense</Button>
+          <Button type="submit">Capture Expense</Button>
         </form>
       </Card>
 
       {queue.length > 0 ? (
         <Card>
           <CardHeader
-            title="Pending sync"
+            title="Pending Sync"
             subtitle="Held on this device until you reconnect"
             action={
               <button
@@ -180,7 +180,7 @@ export function CaptureForm({
                 disabled={!online || syncing}
                 className="rounded-lg bg-surface-2 px-3 py-1.5 text-sm font-medium text-fg hover:bg-border disabled:opacity-50"
               >
-                {syncing ? "Syncing…" : "Sync now"}
+                {syncing ? "Syncing…" : "Sync Now"}
               </button>
             }
           />

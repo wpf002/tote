@@ -43,7 +43,7 @@ export default async function ExportsPage({
 
       <Card>
         <CardHeader
-          title="QuickBooks general journal"
+          title="QuickBooks General Journal"
           subtitle={`Trial balance for ${month} — debits and credits tie out`}
           action={<LinkButton href={`/exports/quickbooks?month=${month}`}>Download CSV</LinkButton>}
         />
@@ -57,7 +57,7 @@ export default async function ExportsPage({
           </button>
         </form>
         {rows.length === 0 ? (
-          <EmptyState title="No activity in this period" />
+          <EmptyState title="No Activity in This Period" />
         ) : (
           <Table>
             <THead>

@@ -77,12 +77,12 @@ export default async function OwnerDetail({ params }: { params: { id: string } }
       {pursePayable > 0n && receivable > 0n ? (
         <Card>
           <CardHeader
-            title="Net purse credit against invoices"
+            title="Net Purse Credit Against Invoices"
             subtitle={`Apply up to ${fmt(pursePayable < receivable ? pursePayable : receivable)} of purse payable to this owner's outstanding invoices`}
             action={
               <form action={applyCredit}>
                 <input type="hidden" name="partyId" value={party.id} />
-                <Button type="submit">Apply purse credit</Button>
+                <Button type="submit">Apply Purse Credit</Button>
               </form>
             }
           />
@@ -92,7 +92,7 @@ export default async function OwnerDetail({ params }: { params: { id: string } }
       <Card>
         <CardHeader title="Statement" subtitle="Every ledger line tagged to this party" />
         {lines.length === 0 ? (
-          <EmptyState title="No statement lines yet" />
+          <EmptyState title="No Statement Lines Yet" />
         ) : (
           <Table>
             <THead>

@@ -26,7 +26,7 @@ export default async function NewVendorBill() {
       </div>
 
       <Card>
-        <CardHeader title="New vendor bill" subtitle="Posts Dr Operating Expense / Cr Accounts Payable" />
+        <CardHeader title="New Vendor Bill" subtitle="Posts Dr Operating Expense / Cr Accounts Payable" />
         <form action={createVendorBill} className="space-y-4 p-5">
           <Field label="Vendor">
             <select name="vendorPartyId" required className={inputClass} defaultValue="">
@@ -78,7 +78,7 @@ export default async function NewVendorBill() {
           </div>
 
           <div className="flex items-center gap-3 pt-2">
-            <Button type="submit">Approve & post</Button>
+            <Button type="submit">Approve & Post</Button>
             <LinkButton href="/vendor-bills" variant="ghost">
               Cancel
             </LinkButton>

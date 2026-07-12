@@ -33,7 +33,7 @@ export default async function AuditPage() {
       </div>
 
       <Card>
-        <CardHeader title="Integrity checks" subtitle="Recomputed from the raw ledger on every load" />
+        <CardHeader title="Integrity Checks" subtitle="Recomputed from the raw ledger on every load" />
         <ul className="divide-y divide-border/60">
           {report.checks.map((c) => (
             <li key={c.name} className="flex items-start gap-3 px-5 py-4">

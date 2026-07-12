@@ -48,9 +48,9 @@ export default async function RacingPage() {
       </div>
 
       <Card>
-        <CardHeader title="Upcoming stakes deadlines" subtitle="Fire before these dates or forfeit eligibility" />
+        <CardHeader title="Upcoming Stakes Deadlines" subtitle="Fire before these dates or forfeit eligibility" />
         {deadlines.length === 0 ? (
-          <EmptyState title="No upcoming deadlines" />
+          <EmptyState title="No Upcoming Deadlines" />
         ) : (
           <Table>
             <THead>
@@ -88,7 +88,7 @@ export default async function RacingPage() {
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Card>
-          <CardHeader title="New stakes schedule" subtitle="Nomination + keep-in ladder" />
+          <CardHeader title="New Stakes Schedule" subtitle="Nomination + keep-in ladder" />
           <form action={addStakesSchedule} className="space-y-4 p-5">
             <Field label="Horse">
               <select name="horseId" required className={inputClass} defaultValue="">
@@ -115,12 +115,12 @@ export default async function RacingPage() {
               <input name="due_2" type="date" className={inputClass} />
               <input name="amount_2" placeholder="1500" className={inputClass} />
             </div>
-            <Button type="submit">Create schedule</Button>
+            <Button type="submit">Create Schedule</Button>
           </form>
         </Card>
 
         <Card>
-          <CardHeader title="Record race result" subtitle="Jockey + trainer cut deducted, rest to owners" />
+          <CardHeader title="Record Race Result" subtitle="Jockey + trainer cut deducted, rest to owners" />
           <form action={recordResult} className="space-y-4 p-5">
             <Field label="Horse">
               <select name="horseId" required className={inputClass} defaultValue="">
@@ -161,14 +161,14 @@ export default async function RacingPage() {
               </Field>
             </div>
             <input name="resultDate" type="date" defaultValue={today} className={inputClass} />
-            <Button type="submit">Record & disburse</Button>
+            <Button type="submit">Record & Disburse</Button>
           </form>
         </Card>
       </div>
 
       {schedules.length > 0 ? (
         <Card>
-          <CardHeader title="Stakes schedules" />
+          <CardHeader title="Stakes Schedules" />
           <Table>
             <THead>
               <tr>

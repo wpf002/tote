@@ -35,12 +35,12 @@ export default async function VendorBillsPage() {
           <h1 className="text-2xl font-semibold tracking-tight">Vendor Bills</h1>
           <p className="mt-1 text-sm text-muted">Bills against the barn and its horses</p>
         </div>
-        <LinkButton href="/vendor-bills/new">+ New bill</LinkButton>
+        <LinkButton href="/vendor-bills/new">+ New Bill</LinkButton>
       </div>
 
       <Card>
         {bills.length === 0 ? (
-          <EmptyState title="No vendor bills yet" hint="Create one to post Dr Expense / Cr Payable." />
+          <EmptyState title="No Vendor Bills Yet" hint="Create one to post Dr Expense / Cr Payable." />
         ) : (
           <Table>
             <THead>
