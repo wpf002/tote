@@ -12,6 +12,7 @@
   },
   "dependencies": {
     "@prisma/client": "^5.22.0",
+    "@tote/ai": "workspace:*",
     "@tote/core": "workspace:*",
     "@tote/db": "workspace:*",
     "@tote/services": "workspace:*",

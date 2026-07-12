@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 
 const NAV = [
   { href: "/dashboard", label: "Dashboard", icon: "▚" },
+  { href: "/ask", label: "Ask Tote", icon: "✦" },
   { href: "/capture", label: "Barn Capture", icon: "◎" },
   { href: "/horses", label: "Horses", icon: "▤" },
   { href: "/owners", label: "Owners & Parties", icon: "◍" },
@@ -14,7 +15,7 @@ const NAV = [
   { href: "/racing", label: "Racing", icon: "▰" },
   { href: "/operations", label: "Operations", icon: "▣" },
   { href: "/tax", label: "Tax & Assets", icon: "§" },
-  { href: "/insights", label: "Insights", icon: "✦" },
+  { href: "/insights", label: "Insights", icon: "✧" },
   { href: "/import", label: "Import", icon: "▼" },
   { href: "/reconcile", label: "Reconcile", icon: "⇄" },
   { href: "/exports", label: "Exports", icon: "▲" },

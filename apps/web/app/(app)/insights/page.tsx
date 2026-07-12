@@ -1,5 +1,7 @@
 import { getTenant } from "@/lib/tenant";
 import { getForecast, getHorseRoi } from "@/lib/intelligence";
+import { getServiceContext } from "@/lib/services";
+import { generateInsights, isConfigured, type Insight } from "@tote/ai";
 import { fmt } from "@/lib/money";
 import { ReceiptDrafter } from "./receipt-drafter";
 import {
@@ -11,16 +13,28 @@ import {
   TH,
   TR,
   TD,
+  Badge,
   EmptyState,
 } from "@/components/ui";
 
 export const dynamic = "force-dynamic";
 
+async function loadInsights(): Promise<{ insights: Insight[]; enabled: boolean }> {
+  if (!isConfigured()) return { insights: [], enabled: false };
+  try {
+    const ctx = await getServiceContext();
+    return { insights: await generateInsights(ctx), enabled: true };
+  } catch {
+    return { insights: [], enabled: true };
+  }
+}
+
 export default async function InsightsPage() {
   const { orgId, legalEntityId } = await getTenant();
-  const [forecast, roi] = await Promise.all([
+  const [forecast, roi, ai] = await Promise.all([
     getForecast(orgId, legalEntityId, 90),
     getHorseRoi(orgId, legalEntityId),
+    loadInsights(),
   ]);
   const offline = !forecast && !roi;
 
@@ -30,6 +44,36 @@ export default async function InsightsPage() {
         <h1 className="text-2xl font-semibold tracking-tight">Insights</h1>
         <p className="mt-1 text-sm text-muted">Receipt drafting, cash-flow forecast, and horse ROI</p>
       </div>
+
+      <Card>
+        <CardHeader
+          title="AI insights"
+          subtitle="What a sharp CFO would flag — grounded in your ledger"
+          action={<Badge tone={ai.enabled ? "brand" : "default"}>{ai.enabled ? "Claude Opus 4.8" : "not configured"}</Badge>}
+        />
+        {!ai.enabled ? (
+          <EmptyState
+            title="Add an ANTHROPIC_API_KEY to enable AI insights"
+            hint="Set it in the web app's environment; the copilot only reads the ledger, never writes it."
+          />
+        ) : ai.insights.length === 0 ? (
+          <EmptyState title="No insights right now" hint="Nothing in the books needs attention." />
+        ) : (
+          <ul className="divide-y divide-border/60">
+            {ai.insights.map((ins, i) => (
+              <li key={i} className="flex items-start gap-3 px-5 py-4">
+                <Badge tone={ins.severity === "risk" ? "negative" : ins.severity === "watch" ? "gold" : "brand"}>
+                  {ins.severity}
+                </Badge>
+                <div>
+                  <div className="text-sm font-medium text-fg">{ins.title}</div>
+                  <div className="mt-0.5 text-sm text-muted">{ins.detail}</div>
+                </div>
+              </li>
+            ))}
+          </ul>
+        )}
+      </Card>
 
       {offline ? (
         <Card>

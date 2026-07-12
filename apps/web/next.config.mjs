@@ -2,9 +2,9 @@
 const nextConfig = {
   reactStrictMode: true,
   // @tote/core and @tote/db ship as TypeScript source; let Next transpile them.
-  transpilePackages: ["@tote/core", "@tote/db", "@tote/services"],
+  transpilePackages: ["@tote/core", "@tote/db", "@tote/services", "@tote/ai"],
   experimental: {
-    serverComponentsExternalPackages: ["@prisma/client", "bcryptjs"],
+    serverComponentsExternalPackages: ["@prisma/client", "bcryptjs", "@anthropic-ai/sdk"],
   },
   webpack: (config) => {
     // @tote/core / @tote/db use NodeNext-style ".js" specifiers that point at
