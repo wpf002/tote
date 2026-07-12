@@ -40,6 +40,13 @@ export {
   recordInsuranceClaim,
   type ApAgingRow,
 } from "./operations.js";
+export { recordHorsePurchase, recordHorseSale } from "./assets.js";
+export {
+  depreciationSchedule,
+  generate1099,
+  ownerTaxPack,
+  type DepreciationMethod,
+} from "./tax.js";
 export {
   parseCsv,
   importVendorBills,
