@@ -10,6 +10,7 @@ const NAV = [
   { href: "/vendor-bills", label: "Vendor Bills", icon: "▦" },
   { href: "/invoices", label: "Invoices", icon: "▧" },
   { href: "/purses", label: "Purses", icon: "◆" },
+  { href: "/import", label: "Import", icon: "▼" },
 ];
 
 export function Sidebar() {

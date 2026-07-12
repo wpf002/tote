@@ -26,6 +26,9 @@ importers:
       '@tote/db':
         specifier: workspace:*
         version: link:../../packages/db
+      '@tote/services':
+        specifier: workspace:*
+        version: link:../../packages/services
       bcryptjs:
         specifier: ^2.4.3
         version: 2.4.3
@@ -103,6 +106,31 @@ importers:
       tsx:
         specifier: ^4.19.1
         version: 4.23.0
+      typescript:
+        specifier: ^5.6.3
+        version: 5.9.3
+      vitest:
+        specifier: ^2.1.4
+        version: 2.1.9(@types/node@20.19.43)
+
+  packages/services:
+    dependencies:
+      '@prisma/client':
+        specifier: ^5.22.0
+        version: 5.22.0(prisma@5.22.0)
+      '@tote/core':
+        specifier: workspace:*
+        version: link:../core
+      '@tote/db':
+        specifier: workspace:*
+        version: link:../db
+    devDependencies:
+      '@types/node':
+        specifier: ^20.16.0
+        version: 20.19.43
+      fast-check:
+        specifier: ^3.23.1
+        version: 3.23.2
       typescript:
         specifier: ^5.6.3
         version: 5.9.3

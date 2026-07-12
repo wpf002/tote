@@ -306,6 +306,9 @@ model VendorBill {
   status        VendorBillStatus @default(DRAFT)
   billDate      DateTime
   journalEntryId String?
+  // Set to the invoice run's key once this bill has been passed through to
+  // owners, so a re-run never double-bills the passthrough.
+  invoicedRunKey String?
   createdAt     DateTime         @default(now())
 
   lines VendorBillLine[]
@@ -353,8 +356,13 @@ model InvoiceLine {
   invoiceId   String
   horseId     String?
   categoryId  String?
+  // TRAINING | PASSTHROUGH
+  kind        String  @default("TRAINING")
   description String
   amountCents BigInt
+  // For passthrough lines: how the amount splits between cost recovery and markup.
+  recoverCents BigInt @default(0)
+  markupCents  BigInt @default(0)
 
   invoice Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 

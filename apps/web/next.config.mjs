@@ -2,7 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   // @tote/core and @tote/db ship as TypeScript source; let Next transpile them.
-  transpilePackages: ["@tote/core", "@tote/db"],
+  transpilePackages: ["@tote/core", "@tote/db", "@tote/services"],
   experimental: {
     serverComponentsExternalPackages: ["@prisma/client", "bcryptjs"],
   },

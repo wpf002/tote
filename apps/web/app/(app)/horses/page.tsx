@@ -9,13 +9,18 @@ import { Card, Table, THead, TH, TR, TD, Badge, EmptyState } from "@/components/
 
 export const dynamic = "force-dynamic";
 
-export default async function HorsesPage() {
+export default async function HorsesPage({
+  searchParams,
+}: {
+  searchParams: { q?: string };
+}) {
   const { orgId } = await getTenant();
   const now = new Date();
+  const q = (searchParams.q ?? "").trim();
 
   const [horses, graph, names] = await Promise.all([
     prisma.horse.findMany({
-      where: { orgId },
+      where: { orgId, ...(q ? { name: { contains: q, mode: "insensitive" } } : {}) },
       orderBy: { name: "asc" },
       include: { trainingRates: { orderBy: { from: "desc" }, take: 1 } },
     }),
@@ -25,9 +30,21 @@ export default async function HorsesPage() {
 
   return (
     <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Horses</h1>
-        <p className="mt-1 text-sm text-muted">{horses.length} in training</p>
+      <div className="flex items-end justify-between gap-4">
+        <div>
+          <h1 className="text-2xl font-semibold tracking-tight">Horses</h1>
+          <p className="mt-1 text-sm text-muted">
+            {q ? `${horses.length} matching "${q}"` : `${horses.length} in training`}
+          </p>
+        </div>
+        <form method="GET" className="w-64">
+          <input
+            name="q"
+            defaultValue={q}
+            placeholder="Search horses…"
+            className="w-full rounded-lg border border-border bg-surface px-3 py-2 text-sm text-fg outline-none focus:border-brand focus:ring-2 focus:ring-brand/20"
+          />
+        </form>
       </div>
 
       <Card>

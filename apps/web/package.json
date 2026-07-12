@@ -14,6 +14,7 @@
     "@prisma/client": "^5.22.0",
     "@tote/core": "workspace:*",
     "@tote/db": "workspace:*",
+    "@tote/services": "workspace:*",
     "bcryptjs": "^2.4.3",
     "next": "14.2.15",
     "react": "^18.3.1",
