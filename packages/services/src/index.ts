@@ -26,6 +26,13 @@ export {
   type ReconMatch,
 } from "./reconciliation.js";
 export {
+  createStakesSchedule,
+  upcomingStakesDeadlines,
+  payStakesInstallment,
+  recordRaceResult,
+  type RaceResultInput,
+} from "./racing.js";
+export {
   parseCsv,
   importVendorBills,
   type VendorBillMapping,
