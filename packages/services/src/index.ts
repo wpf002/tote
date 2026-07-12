@@ -41,6 +41,7 @@ export {
   type ApAgingRow,
 } from "./operations.js";
 export { recordHorsePurchase, recordHorseSale } from "./assets.js";
+export { createCheckpoint, balanceOfAt } from "./checkpoint.js";
 export {
   depreciationSchedule,
   generate1099,

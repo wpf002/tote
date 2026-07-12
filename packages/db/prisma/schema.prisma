@@ -273,6 +273,39 @@ model JournalEntry {
   @@map("journal_entries")
 }
 
+// Periodic balance checkpoint (Phase 8 perf): a snapshot of summed debits and
+// credits per (account, dimension) through a cutoff date. Derived truth is
+// preserved — balanceOf = latest checkpoint + replay of lines posted after it.
+// Never a stored source of truth; a checkpoint can always be rebuilt from lines.
+model LedgerCheckpoint {
+  id            String   @id @default(cuid())
+  orgId         String
+  legalEntityId String
+  throughDate   DateTime
+  createdAt     DateTime @default(now())
+
+  balances CheckpointBalance[]
+
+  @@index([orgId, legalEntityId, throughDate])
+  @@map("ledger_checkpoints")
+}
+
+model CheckpointBalance {
+  id           String      @id @default(cuid())
+  checkpointId String
+  accountKind  AccountKind
+  partyId      String?
+  horseId      String?
+  categoryId   String?
+  debit        BigInt      @default(0)
+  credit       BigInt      @default(0)
+
+  checkpoint LedgerCheckpoint @relation(fields: [checkpointId], references: [id], onDelete: Cascade)
+
+  @@index([checkpointId, accountKind])
+  @@map("checkpoint_balances")
+}
+
 model JournalLine {
   id            String      @id
   entryId       String
