@@ -33,6 +33,14 @@ export {
   type RaceResultInput,
 } from "./racing.js";
 export {
+  runPayroll,
+  apAging,
+  recordShipment,
+  recordInsurancePolicy,
+  recordInsuranceClaim,
+  type ApAgingRow,
+} from "./operations.js";
+export {
   parseCsv,
   importVendorBills,
   type VendorBillMapping,

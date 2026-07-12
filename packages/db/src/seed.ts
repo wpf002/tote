@@ -21,6 +21,14 @@ const LE_SYNDICATE = "le_syndicate";
 const FROM = new Date("2025-01-01T00:00:00Z");
 
 async function wipe() {
+  await prisma.reminder.deleteMany({ where: { orgId: ORG } });
+  await prisma.stakesSchedule.deleteMany({ where: { orgId: ORG } });
+  await prisma.insurancePolicy.deleteMany({ where: { orgId: ORG } });
+  await prisma.shipment.deleteMany({ where: { orgId: ORG } });
+  await prisma.payrollRun.deleteMany({ where: { orgId: ORG } });
+  await prisma.employee.deleteMany({ where: { orgId: ORG } });
+  await prisma.payment.deleteMany({ where: { orgId: ORG } });
+  await prisma.invoice.deleteMany({ where: { orgId: ORG } });
   await prisma.vendorBill.deleteMany({ where: { orgId: ORG } });
   await prisma.purse.deleteMany({ where: { orgId: ORG } });
   await prisma.journalEntry.deleteMany({ where: { orgId: ORG } });
@@ -75,6 +83,8 @@ async function main() {
     { id: "v_farrier", type: "VENDOR", name: "Iron & Anvil Farrier" },
     { id: "v_transport", type: "VENDOR", name: "GallopWay Transport" },
     { id: "j_lopez", type: "JOCKEY", name: "J. Lopez" },
+    { id: "e_maria", type: "EMPLOYEE", name: "Maria Santos" },
+    { id: "e_luis", type: "EMPLOYEE", name: "Luis Romero" },
   ];
   await prisma.party.createMany({
     data: parties.map((p) => ({
@@ -136,6 +146,14 @@ async function main() {
       basisPoints: o.basisPoints,
       from: o.from,
     })),
+  });
+
+  // Employees for payroll.
+  await prisma.employee.createMany({
+    data: [
+      { id: "emp_maria", orgId: ORG, partyId: "e_maria", isW2: true },
+      { id: "emp_luis", orgId: ORG, partyId: "e_luis", isW2: true },
+    ],
   });
 
   // Point an owner-portal user at Bob so the portal has data to show.
