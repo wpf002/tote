@@ -54,3 +54,14 @@ export {
   type VendorBillMapping,
   type ImportResult,
 } from "./import.js";
+export {
+  importOwnershipRoster,
+  importTrainingRates,
+  saveImportTemplate,
+  listImportTemplates,
+  IMPORT_PRESETS,
+  type OwnershipMapping,
+  type TrainingRateMapping,
+  type OwnershipImportResult,
+  type TrainingRateImportResult,
+} from "./migration.js";

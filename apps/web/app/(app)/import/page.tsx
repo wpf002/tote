@@ -1,100 +1,92 @@
-"use client";
+import { MappedImport } from "@/components/mapped-import";
+import { importRoster, importRates, importBills } from "./actions";
 
-import { useFormState, useFormStatus } from "react-dom";
-import { importBills, type ImportState } from "./actions";
-import { Card, CardHeader, Field, inputClass } from "@/components/ui";
+export const dynamic = "force-dynamic";
 
-const SAMPLE = `Date,Vendor,Horse,Category,Memo,Amount
+const ROSTER_SAMPLE = `Horse,Owner,Percent
+Thunderbolt,Bob Carter,60
+Thunderbolt,Carol Diaz,40
+Silk Road,Blue Silks Syndicate,50
+Silk Road,Dan Ellis,50
+Halley's Comet,Alice Nguyen,100`;
+
+const RATES_SAMPLE = `Horse,Daily Rate
+Thunderbolt,75.00
+Silk Road,85.00
+Halley's Comet,65.00`;
+
+const BILLS_SAMPLE = `Date,Vendor,Horse,Category,Memo,Amount
 2026-06-03,Ridgeline Equine Vet,Thunderbolt,Veterinary,Lameness exam,"$1,250.00"
-2026-06-05,Iron & Anvil Farrier,Silk Road,Farrier,Full set,180.00
-2026-06-08,GallopWay Transport,Halley's Comet,Transport,Ship to Keeneland,540.00`;
-
-function SubmitButton() {
-  const { pending } = useFormStatus();
-  return (
-    <button
-      type="submit"
-      disabled={pending}
-      className="rounded-lg bg-brand px-4 py-2 text-sm font-semibold text-brand-fg transition hover:opacity-90 disabled:opacity-60"
-    >
-      {pending ? "Importing…" : "Import bills"}
-    </button>
-  );
-}
+2026-06-05,Iron & Anvil Farrier,Silk Road,Farrier,Full set,180.00`;
 
 export default function ImportPage() {
-  const [state, action] = useFormState<ImportState, FormData>(importBills, {});
-
   return (
     <div className="space-y-6">
       <div>
-        <h1 className="text-2xl font-semibold tracking-tight">Import</h1>
+        <h1 className="text-2xl font-semibold tracking-tight">Migrate a barn</h1>
         <p className="mt-1 text-sm text-muted">
-          Paste a barn&apos;s spreadsheet, map the columns, and land a whole month of vendor bills —
-          missing vendors, horses, and categories are created automatically.
+          Bring a whole barn over from HorseBills or a spreadsheet — ownership, rates, and bills — with no manual
+          re-entry. Pick a preset, paste, and go. Missing horses and owners are created automatically; ownership always
+          lands penny-exact.
         </p>
       </div>
 
-      <form action={action} className="space-y-6">
-        <Card>
-          <CardHeader title="1 · Paste CSV" subtitle="Copy rows straight from Excel or Google Sheets" />
-          <div className="p-5">
-            <textarea
-              name="csv"
-              defaultValue={SAMPLE}
-              rows={8}
-              spellCheck={false}
-              className={inputClass + " font-mono text-xs"}
-            />
-          </div>
-        </Card>
+      <MappedImport
+        title="Ownership roster"
+        subtitle="One row per horse/owner/share. Shares normalize to exactly 100%."
+        fields={[
+          { key: "horse", label: "Horse column" },
+          { key: "owner", label: "Owner column" },
+          { key: "share", label: "Share column" },
+        ]}
+        presets={{
+          Generic: { horse: "Horse", owner: "Owner", share: "Percent" },
+          HorseBills: { horse: "Horse", owner: "Owner", share: "Ownership %" },
+          QuickBooks: { horse: "Class", owner: "Customer", share: "Percentage" },
+        }}
+        sample={ROSTER_SAMPLE}
+        action={importRoster}
+      />
 
-        <Card>
-          <CardHeader title="2 · Map columns" subtitle="Which header holds each field" />
-          <div className="grid grid-cols-2 gap-4 p-5 md:grid-cols-3">
-            <Field label="Date column">
-              <input name="col_date" defaultValue="Date" className={inputClass} />
-            </Field>
-            <Field label="Vendor column">
-              <input name="col_vendor" defaultValue="Vendor" className={inputClass} />
-            </Field>
-            <Field label="Amount column">
-              <input name="col_amount" defaultValue="Amount" className={inputClass} />
-            </Field>
-            <Field label="Horse column">
-              <input name="col_horse" defaultValue="Horse" className={inputClass} />
-            </Field>
-            <Field label="Category column">
-              <input name="col_category" defaultValue="Category" className={inputClass} />
-            </Field>
-            <Field label="Memo column">
-              <input name="col_description" defaultValue="Memo" className={inputClass} />
-            </Field>
-          </div>
-        </Card>
+      <MappedImport
+        title="Training rates"
+        subtitle="Per-horse daily rate in dollars."
+        fields={[
+          { key: "horse", label: "Horse column" },
+          { key: "dailyRate", label: "Daily rate column" },
+        ]}
+        presets={{
+          Generic: { horse: "Horse", dailyRate: "Daily Rate" },
+          HorseBills: { horse: "Horse", dailyRate: "Day Rate" },
+        }}
+        sample={RATES_SAMPLE}
+        action={importRates}
+      />
 
-        <div className="flex items-center gap-4">
-          <SubmitButton />
-          {state.error ? <span className="text-sm text-negative">{state.error}</span> : null}
-          {state.ok ? (
-            <span className="text-sm text-positive">
-              Imported {state.imported} bill{state.imported === 1 ? "" : "s"} · {state.total}
-              {state.errors && state.errors.length > 0 ? ` · ${state.errors.length} skipped` : ""}
-            </span>
-          ) : null}
-        </div>
-
-        {state.errors && state.errors.length > 0 ? (
-          <Card>
-            <CardHeader title="Skipped rows" />
-            <ul className="space-y-1 p-5 text-sm text-muted">
-              {state.errors.map((e, i) => (
-                <li key={i}>{e}</li>
-              ))}
-            </ul>
-          </Card>
-        ) : null}
-      </form>
+      <MappedImport
+        title="Vendor bills"
+        subtitle="A month of expenses. Vendors, horses, and categories are created as needed."
+        fields={[
+          { key: "date", label: "Date column" },
+          { key: "vendor", label: "Vendor column" },
+          { key: "amount", label: "Amount column" },
+          { key: "horse", label: "Horse column" },
+          { key: "category", label: "Category column" },
+          { key: "description", label: "Memo column" },
+        ]}
+        presets={{
+          Generic: {
+            date: "Date",
+            vendor: "Vendor",
+            amount: "Amount",
+            horse: "Horse",
+            category: "Category",
+            description: "Memo",
+          },
+        }}
+        sample={BILLS_SAMPLE}
+        action={importBills}
+      />
     </div>
   );
 }
