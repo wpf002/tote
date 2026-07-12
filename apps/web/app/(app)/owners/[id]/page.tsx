@@ -49,9 +49,19 @@ export default async function OwnerDetail({ params }: { params: { id: string } }
         <span className="text-fg">{party.name}</span>
       </div>
 
-      <div className="flex items-center gap-3">
-        <h1 className="text-2xl font-semibold tracking-tight">{party.name}</h1>
-        {party.type === "SYNDICATE" ? <Badge tone="gold">Syndicate</Badge> : <Badge>Individual</Badge>}
+      <div className="flex items-center justify-between gap-3">
+        <div className="flex items-center gap-3">
+          <h1 className="text-2xl font-semibold tracking-tight">{party.name}</h1>
+          {party.type === "SYNDICATE" ? <Badge tone="gold">Syndicate</Badge> : <Badge>Individual</Badge>}
+        </div>
+        <a
+          href={`/statement/${party.id}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 rounded-lg bg-surface-2 px-3.5 py-2 text-sm font-medium text-fg transition hover:bg-border"
+        >
+          Download statement PDF
+        </a>
       </div>
 
       <div className="grid grid-cols-3 gap-4">

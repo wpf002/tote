@@ -42,6 +42,7 @@ export {
 } from "./operations.js";
 export { recordHorsePurchase, recordHorseSale } from "./assets.js";
 export { createCheckpoint, balanceOfAt } from "./checkpoint.js";
+export { auditLedger, type AuditReport, type AuditCheck } from "./audit.js";
 export {
   depreciationSchedule,
   generate1099,

@@ -18,6 +18,7 @@ const NAV = [
   { href: "/insights", label: "Insights", icon: "✧" },
   { href: "/import", label: "Import", icon: "▼" },
   { href: "/reconcile", label: "Reconcile", icon: "⇄" },
+  { href: "/audit", label: "Ledger Audit", icon: "✓" },
   { href: "/exports", label: "Exports", icon: "▲" },
 ];
 
