@@ -11,6 +11,21 @@ export {
 export { recordOwnerPayment, type PaymentApplicationInput } from "./payments.js";
 export { recordAndDisbursePurse, applyPurseCreditToInvoices } from "./purse.js";
 export {
+  type RailProvider,
+  type RailEvent,
+  SandboxRail,
+  signPayload,
+} from "./rail.js";
+export { createPaymentIntent, handleRailWebhook } from "./rail-service.js";
+export { exportGeneralJournalCsv, trialBalance } from "./export.js";
+export {
+  importBankTransactions,
+  proposeReconciliation,
+  commitMatches,
+  type BankCsvMapping,
+  type ReconMatch,
+} from "./reconciliation.js";
+export {
   parseCsv,
   importVendorBills,
   type VendorBillMapping,

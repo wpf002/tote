@@ -3,6 +3,7 @@ import { prisma } from "@/lib/db";
 import { loadOwnershipGraph } from "@/lib/ownership";
 import { resolveEffectiveOwnership } from "@tote/core";
 import { fmt, fmtBps } from "@/lib/money";
+import { payInvoiceOnline } from "./actions";
 import {
   Card,
   CardHeader,
@@ -12,6 +13,8 @@ import {
   TH,
   TR,
   TD,
+  Button,
+  Badge,
   EmptyState,
 } from "@/components/ui";
 
@@ -33,7 +36,7 @@ export default async function PortalPage() {
 
   const partyId = user.partyId;
   const ledger = await getLedger();
-  const [party, receivable, pursePayable, net, graph, horses, lines] = await Promise.all([
+  const [party, receivable, pursePayable, net, graph, horses, lines, invoices] = await Promise.all([
     prisma.party.findFirst({ where: { id: partyId, orgId } }),
     ledger.balanceOf("ACCOUNTS_RECEIVABLE", { partyId }),
     ledger.balanceOf("OWNER_PURSE_PAYABLE", { partyId }),
@@ -46,7 +49,20 @@ export default async function PortalPage() {
       orderBy: { entry: { date: "desc" } },
       take: 30,
     }),
+    prisma.invoice.findMany({
+      where: { orgId, ownerPartyId: partyId, status: "FINALIZED" },
+      include: { lines: true, paymentApplications: true },
+      orderBy: { createdAt: "desc" },
+    }),
   ]);
+
+  const outstandingInvoices = invoices
+    .map((inv) => {
+      const total = inv.lines.reduce((a, l) => a + l.amountCents, 0n);
+      const paid = inv.paymentApplications.reduce((a, p) => a + p.amountCents, 0n);
+      return { inv, outstanding: total - paid };
+    })
+    .filter((x) => x.outstanding > 0n);
 
   const now = new Date();
   const myHorses = horses
@@ -76,6 +92,40 @@ export default async function PortalPage() {
           tone={net > 0n ? "positive" : net < 0n ? "negative" : "default"}
         />
       </div>
+
+      {outstandingInvoices.length > 0 ? (
+        <Card>
+          <CardHeader title="Pay online" subtitle="Card or ACH — funds settle straight to the barn" />
+          <Table>
+            <THead>
+              <tr>
+                <TH>Invoice</TH>
+                <TH right>Outstanding</TH>
+                <TH right>Pay</TH>
+              </tr>
+            </THead>
+            <tbody>
+              {outstandingInvoices.map(({ inv, outstanding }) => (
+                <TR key={inv.id}>
+                  <TD>
+                    {inv.runKey ?? inv.periodStart.toISOString().slice(0, 7)}{" "}
+                    <Badge>{inv.lines.length} lines</Badge>
+                  </TD>
+                  <TD right mono>
+                    {fmt(outstanding)}
+                  </TD>
+                  <TD right>
+                    <form action={payInvoiceOnline} className="flex justify-end">
+                      <input type="hidden" name="invoiceId" value={inv.id} />
+                      <Button type="submit">Pay {fmt(outstanding)}</Button>
+                    </form>
+                  </TD>
+                </TR>
+              ))}
+            </tbody>
+          </Table>
+        </Card>
+      ) : null}
 
       <Card>
         <CardHeader title="Your horses" />
