@@ -5,6 +5,10 @@ build/
 coverage/
 *.tsbuildinfo
 .DS_Store
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
 .env
 .env.*
 !.env.example

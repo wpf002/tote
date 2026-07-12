@@ -13,6 +13,7 @@ const NAV = [
   { href: "/racing", label: "Racing", icon: "▰" },
   { href: "/operations", label: "Operations", icon: "▣" },
   { href: "/tax", label: "Tax & Assets", icon: "§" },
+  { href: "/insights", label: "Insights", icon: "✦" },
   { href: "/import", label: "Import", icon: "▼" },
   { href: "/reconcile", label: "Reconcile", icon: "⇄" },
   { href: "/exports", label: "Exports", icon: "▲" },
