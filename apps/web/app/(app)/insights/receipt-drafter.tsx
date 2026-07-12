@@ -43,7 +43,7 @@ export function ReceiptDrafter() {
 
   return (
     <Card>
-      <CardHeader title="Receipt → Draft Bill" subtitle="Paste a receipt; get a pre-filled vendor bill back" />
+      <CardHeader title="Receipt Drafter" subtitle="Paste a receipt; get a pre-filled vendor bill back" />
       <form action={action} className="grid gap-6 p-5 md:grid-cols-2">
         {/* Left: paste */}
         <div className="space-y-3">
