@@ -27,7 +27,7 @@ export default async function OwnersPage() {
     <div className="space-y-6">
       <div>
         <h1 className="text-2xl font-semibold tracking-tight">Owners & Parties</h1>
-        <p className="mt-1 text-sm text-muted">{parties.length} owners and syndicates</p>
+        <p className="mt-1 text-sm text-muted">{parties.length} Owners and Syndicates</p>
       </div>
 
       <Card>

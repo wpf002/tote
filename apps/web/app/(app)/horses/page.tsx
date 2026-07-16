@@ -34,7 +34,7 @@ export default async function HorsesPage({
         <div>
           <h1 className="text-2xl font-semibold tracking-tight">Horses</h1>
           <p className="mt-1 text-sm text-muted">
-            {q ? `${horses.length} matching "${q}"` : `${horses.length} in training`}
+            {q ? `${horses.length} Matching "${q}"` : `${horses.length} In Training`}
           </p>
         </div>
         <form method="GET" className="w-64">
