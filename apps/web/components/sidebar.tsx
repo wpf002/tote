@@ -21,8 +21,9 @@ import {
   Trophy,
   Users,
   Wrench,
-  type Icon,
-} from "@phosphor-icons/react";
+} from "@phosphor-icons/react/dist/ssr";
+// Type-only, so it erases at compile time and never pulls in the CSR runtime.
+import type { Icon } from "@phosphor-icons/react/dist/lib/types";
 
 interface Item {
   href: string;
