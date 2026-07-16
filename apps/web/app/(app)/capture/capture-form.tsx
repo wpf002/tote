@@ -117,7 +117,7 @@ export function CaptureForm({
   return (
     <div className="space-y-4">
       <div className="flex items-center gap-2">
-        <Badge tone={online ? "positive" : "negative"}>{online ? "Online" : "Offline"}</Badge>
+        {!online ? <Badge tone="negative">Offline</Badge> : null}
         {queue.length > 0 ? <Badge tone="gold">{queue.length} queued</Badge> : null}
         {syncedCount > 0 ? <Badge tone="brand">{syncedCount} synced</Badge> : null}
       </div>

@@ -5,6 +5,7 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import {
   ArrowsLeftRight,
+  Barn,
   Camera,
   CaretRight,
   ChartLine,
@@ -12,7 +13,6 @@ import {
   Export,
   FileText,
   FlagCheckered,
-  Horse,
   Receipt,
   Scales,
   SealCheck,
@@ -49,7 +49,7 @@ const GROUPS: { title: string; items: Item[] }[] = [
   {
     title: "Records",
     items: [
-      { href: "/horses", label: "Horses", icon: Horse },
+      { href: "/horses", label: "Horses", icon: Barn },
       { href: "/owners", label: "Owners & Parties", icon: Users },
     ],
   },
