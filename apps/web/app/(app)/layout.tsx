@@ -19,7 +19,6 @@ export default async function AppLayout({ children }: { children: React.ReactNod
           <span className="text-base font-semibold tracking-tight">Tote</span>
         </div>
         <Sidebar />
-        <div className="mt-auto px-5 py-4 text-xs text-muted">Immutable ledger · penny-exact</div>
       </aside>
 
       <div className="flex min-w-0 flex-1 flex-col">

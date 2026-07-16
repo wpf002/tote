@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { getTenant } from "@/lib/tenant";
 import { getForecast, getHorseRoi } from "@/lib/intelligence";
 import { getServiceContext } from "@/lib/services";
@@ -29,12 +30,73 @@ async function loadInsights(): Promise<{ insights: Insight[]; enabled: boolean }
   }
 }
 
+/** The live Claude call is slow (~10s), so it streams in on its own. */
+async function AiInsightsCard() {
+  const ai = await loadInsights();
+
+  return (
+    <Card>
+      <CardHeader
+        title="AI Insights"
+        subtitle="What a sharp CFO would flag — grounded in your ledger"
+        action={<Badge tone={ai.enabled ? "brand" : "default"}>{ai.enabled ? "Claude Opus 4.8" : "not configured"}</Badge>}
+      />
+      {!ai.enabled ? (
+        <EmptyState
+          title="Add an ANTHROPIC_API_KEY to Enable AI Insights"
+          hint="Set it in the web app's environment; the copilot only reads the ledger, never writes it."
+        />
+      ) : ai.insights.length === 0 ? (
+        <EmptyState title="No Insights Right Now" hint="Nothing in the books needs attention." />
+      ) : (
+        <ul className="divide-y divide-border/60">
+          {ai.insights.map((ins, i) => (
+            <li key={i} className="flex items-start gap-4 px-5 py-4">
+              <span className="w-16 shrink-0 pt-0.5">
+                <Badge tone={ins.severity === "risk" ? "negative" : ins.severity === "watch" ? "gold" : "brand"}>
+                  {ins.severity}
+                </Badge>
+              </span>
+              <div className="min-w-0">
+                <div className="text-sm font-medium text-fg">{ins.title}</div>
+                <div className="mt-0.5 text-sm text-muted">{ins.detail}</div>
+              </div>
+            </li>
+          ))}
+        </ul>
+      )}
+    </Card>
+  );
+}
+
+function AiInsightsPending() {
+  return (
+    <Card>
+      <CardHeader
+        title="AI Insights"
+        subtitle="What a sharp CFO would flag — grounded in your ledger"
+        action={<Badge tone="default">Reading your ledger…</Badge>}
+      />
+      <ul className="divide-y divide-border/60">
+        {[0, 1, 2].map((i) => (
+          <li key={i} className="flex animate-pulse items-start gap-4 px-5 py-4">
+            <span className="h-5 w-16 shrink-0 rounded-full bg-surface-2" />
+            <div className="min-w-0 flex-1 space-y-2">
+              <div className="h-4 w-1/3 rounded bg-surface-2" />
+              <div className="h-3 w-3/4 rounded bg-surface-2" />
+            </div>
+          </li>
+        ))}
+      </ul>
+    </Card>
+  );
+}
+
 export default async function InsightsPage() {
   const { orgId, legalEntityId } = await getTenant();
-  const [forecast, roi, ai] = await Promise.all([
+  const [forecast, roi] = await Promise.all([
     getForecast(orgId, legalEntityId, 90),
     getHorseRoi(orgId, legalEntityId),
-    loadInsights(),
   ]);
   const offline = !forecast && !roi;
 
@@ -45,37 +107,9 @@ export default async function InsightsPage() {
         <p className="mt-1 text-sm text-muted">Receipt drafting, cash-flow forecast, and horse ROI</p>
       </div>
 
-      <Card>
-        <CardHeader
-          title="AI Insights"
-          subtitle="What a sharp CFO would flag — grounded in your ledger"
-          action={<Badge tone={ai.enabled ? "brand" : "default"}>{ai.enabled ? "Claude Opus 4.8" : "not configured"}</Badge>}
-        />
-        {!ai.enabled ? (
-          <EmptyState
-            title="Add an ANTHROPIC_API_KEY to Enable AI Insights"
-            hint="Set it in the web app's environment; the copilot only reads the ledger, never writes it."
-          />
-        ) : ai.insights.length === 0 ? (
-          <EmptyState title="No Insights Right Now" hint="Nothing in the books needs attention." />
-        ) : (
-          <ul className="divide-y divide-border/60">
-            {ai.insights.map((ins, i) => (
-              <li key={i} className="flex items-start gap-4 px-5 py-4">
-                <span className="w-16 shrink-0 pt-0.5">
-                  <Badge tone={ins.severity === "risk" ? "negative" : ins.severity === "watch" ? "gold" : "brand"}>
-                    {ins.severity}
-                  </Badge>
-                </span>
-                <div className="min-w-0">
-                  <div className="text-sm font-medium text-fg">{ins.title}</div>
-                  <div className="mt-0.5 text-sm text-muted">{ins.detail}</div>
-                </div>
-              </li>
-            ))}
-          </ul>
-        )}
-      </Card>
+      <Suspense fallback={<AiInsightsPending />}>
+        <AiInsightsCard />
+      </Suspense>
 
       {offline ? (
         <Card>

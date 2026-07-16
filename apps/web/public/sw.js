@@ -34,17 +34,24 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
+  // Stale-while-revalidate: serve the cached copy for speed, but always refresh
+  // it in the background. Cache-first without this pins an asset to its first
+  // version forever, which silently strands the app on a stale build.
   event.respondWith(
-    caches.match(request).then(
-      (cached) =>
-        cached ||
-        fetch(request).then((res) => {
-          if (res.ok && new URL(request.url).origin === self.location.origin) {
-            const copy = res.clone();
-            caches.open(CACHE).then((c) => c.put(request, copy));
-          }
-          return res;
-        }),
-    ),
+    caches.match(request).then((cached) => {
+      const network = fetch(request).then((res) => {
+        if (res.ok && new URL(request.url).origin === self.location.origin) {
+          const copy = res.clone();
+          caches.open(CACHE).then((c) => c.put(request, copy));
+        }
+        return res;
+      });
+
+      if (cached) {
+        event.waitUntil(network.catch(() => {}));
+        return cached;
+      }
+      return network;
+    }),
   );
 });

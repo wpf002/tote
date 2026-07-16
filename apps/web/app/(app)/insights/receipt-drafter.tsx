@@ -67,11 +67,8 @@ export function ReceiptDrafter() {
         <div>
           {draft ? (
             <div className="rounded-xl border border-border bg-surface-2 p-5">
-              <div className="mb-4 flex items-center justify-between">
+              <div className="mb-4">
                 <span className="text-sm font-semibold text-fg">Drafted Bill</span>
-                <Badge tone={draft.confidence >= 0.75 ? "positive" : "gold"}>
-                  {Math.round(draft.confidence * 100)}% Confident
-                </Badge>
               </div>
               <div className="space-y-4">
                 <Field label="Vendor">
