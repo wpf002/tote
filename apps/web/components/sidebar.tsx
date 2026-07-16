@@ -3,52 +3,72 @@
 import { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import {
+  ArrowsLeftRight,
+  Camera,
+  CaretRight,
+  ChartLine,
+  DownloadSimple,
+  Export,
+  FileText,
+  FlagCheckered,
+  Horse,
+  Receipt,
+  Scales,
+  SealCheck,
+  Sparkle,
+  SquaresFour,
+  Trophy,
+  Users,
+  Wrench,
+  type Icon,
+} from "@phosphor-icons/react";
 
 interface Item {
   href: string;
   label: string;
-  icon: string;
+  icon: Icon;
 }
 
 const GROUPS: { title: string; items: Item[] }[] = [
   {
     title: "Overview",
     items: [
-      { href: "/dashboard", label: "Dashboard", icon: "▚" },
-      { href: "/insights", label: "Insights", icon: "✧" },
+      { href: "/dashboard", label: "Dashboard", icon: SquaresFour },
+      { href: "/insights", label: "Insights", icon: ChartLine },
     ],
   },
   {
     title: "Billing",
     items: [
-      { href: "/invoices", label: "Invoices", icon: "▧" },
-      { href: "/vendor-bills", label: "Vendor Bills", icon: "▦" },
-      { href: "/purses", label: "Purses", icon: "◆" },
+      { href: "/invoices", label: "Invoices", icon: FileText },
+      { href: "/vendor-bills", label: "Vendor Bills", icon: Receipt },
+      { href: "/purses", label: "Purses", icon: Trophy },
     ],
   },
   {
     title: "Records",
     items: [
-      { href: "/horses", label: "Horses", icon: "▤" },
-      { href: "/owners", label: "Owners & Parties", icon: "◍" },
+      { href: "/horses", label: "Horses", icon: Horse },
+      { href: "/owners", label: "Owners & Parties", icon: Users },
     ],
   },
   {
     title: "Month-End",
     items: [
-      { href: "/reconcile", label: "Reconcile", icon: "⇄" },
-      { href: "/audit", label: "Ledger Audit", icon: "✓" },
-      { href: "/exports", label: "Exports", icon: "▲" },
+      { href: "/reconcile", label: "Reconcile", icon: ArrowsLeftRight },
+      { href: "/audit", label: "Ledger Audit", icon: SealCheck },
+      { href: "/exports", label: "Exports", icon: Export },
     ],
   },
 ];
 
 const MORE: Item[] = [
-  { href: "/racing", label: "Racing", icon: "▰" },
-  { href: "/operations", label: "Operations", icon: "▣" },
-  { href: "/tax", label: "Tax & Assets", icon: "§" },
-  { href: "/import", label: "Import", icon: "▼" },
-  { href: "/capture", label: "Barn Capture", icon: "◎" },
+  { href: "/racing", label: "Racing", icon: FlagCheckered },
+  { href: "/operations", label: "Operations", icon: Wrench },
+  { href: "/tax", label: "Tax & Assets", icon: Scales },
+  { href: "/import", label: "Import", icon: DownloadSimple },
+  { href: "/capture", label: "Barn Capture", icon: Camera },
 ];
 
 function isActive(pathname: string, href: string): boolean {
@@ -56,6 +76,7 @@ function isActive(pathname: string, href: string): boolean {
 }
 
 function NavLink({ item, active }: { item: Item; active: boolean }) {
+  const Glyph = item.icon;
   return (
     <Link
       href={item.href}
@@ -64,9 +85,7 @@ function NavLink({ item, active }: { item: Item; active: boolean }) {
         (active ? "bg-brand-soft text-brand" : "text-muted hover:bg-surface-2 hover:text-fg")
       }
     >
-      <span aria-hidden className="w-4 text-center text-xs opacity-70">
-        {item.icon}
-      </span>
+      <Glyph aria-hidden size={18} weight={active ? "fill" : "regular"} className="shrink-0" />
       {item.label}
     </Link>
   );
@@ -90,9 +109,7 @@ export function Sidebar() {
             : "border-border bg-surface text-muted hover:border-brand/40 hover:text-fg")
         }
       >
-        <span aria-hidden className="text-brand">
-          ✦
-        </span>
+        <Sparkle aria-hidden size={16} weight="fill" className="shrink-0 text-brand" />
         Ask Your Books…
       </Link>
 
@@ -115,9 +132,12 @@ export function Sidebar() {
           onClick={() => setMoreOpen((v) => !v)}
           className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-[10px] font-semibold uppercase tracking-wider text-muted/70 transition hover:text-fg"
         >
-          <span aria-hidden className={"text-xs transition-transform " + (showMore ? "rotate-90" : "")}>
-            ›
-          </span>
+          <CaretRight
+            aria-hidden
+            size={12}
+            weight="bold"
+            className={"shrink-0 transition-transform " + (showMore ? "rotate-90" : "")}
+          />
           More
         </button>
         {showMore ? (

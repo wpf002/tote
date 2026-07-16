@@ -11,6 +11,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "@phosphor-icons/react": "^2.1.10",
     "@prisma/client": "^5.22.0",
     "@tote/ai": "workspace:*",
     "@tote/core": "workspace:*",
